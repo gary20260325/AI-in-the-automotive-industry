@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI对汽车行业就业市场的冲击</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        body { background: #0a0a0f; color: #ffffff; }
+        
+        /* 热力图方块动画 */
+        .treemap-rect {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            overflow: hidden;
+            position: absolute;
+            border: 1px solid rgba(0,0,0,0.3);
+            opacity: 0;
+            animation: rectAppear 0.6s ease-out forwards;
+        }
+        
+        .treemap-rect:hover {
+            transform: scale(1.05) translateZ(0);
+            border: 2px solid rgba(255,255,255,0.8);
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .treemap-rect.selected {
+            border: 2px solid #3b82f6;
+            z-index: 101;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* 方块渐入动画 */
+        @keyframes rectAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* 滚动条样式 */
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: #1a1a24; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #3a3a4a; border-radius: 3px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #4a4a5a; }
+        
+        /* 模态框动画 */
+        .modal-overlay {
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .modal-content {
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* 进度条动画 */
+        .progress-bar {
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* 淡入动画 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 脉冲动画 */
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* 统计卡片动画 */
+        .stat-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: left 0.5s;
+        }
+        
+        .stat-card:hover::before {
+            left: 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+        }
+        
+        /* 语言按钮动画 */
+        .lang-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .lang-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+        
+        .lang-btn:hover::before {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .lang-btn.active {
+            background: #3b82f6;
+            transform: scale(1.05);
+        }
+        
+        /* 数字计数动画 */
+        .count-up {
+            display: inline-block;
+            animation: countUp 0.8s ease-out;
+        }
+        
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 按钮波纹效果 */
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ripple::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .ripple:active::after {
+            width: 200px;
+            height: 200px;
+        }
+        
+        /* 侧边栏项目动画 */
+        .sidebar-item {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .sidebar-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #3b82f6;
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-item:hover::before {
+            transform: scaleY(1);
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            padding-left: 1rem;
+        }
+        
+        /* 加载动画 */
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 骨架屏动画 */
+        .skeleton {
+            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
+            background-size: 200% 100%;
+            animation: skeleton 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes skeleton {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* 悬浮提示动画 */
+        .tooltip {
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+        
+        .tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 图标旋转动画 */
+        .icon-rotate {
+            transition: transform 0.3s ease;
+        }
+        
+        .icon-rotate:hover {
+            transform: rotate(180deg);
+        }
+        
+        /* 渐变背景动画 */
+        .gradient-bg {
+            background: linear-gradient(135deg, #0a0a0f, #1a1a2f, #0a0a0f);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 发光效果 */
+        .glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+            to {
+                box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+            }
+        }
+        
+        /* 弹跳动画 */
+        .bounce-in {
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        /* 滑动动画 */
+        .slide-in-left {
+            animation: slideInLeft 0.5s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .slide-in-right {
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* 缩放动画 */
+        .scale-in {
+            animation: scaleIn 0.4s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-72 bg-[#0f0f16] border-r border-[#252535] flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-[#252535]">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-9 h-9 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                        </svg>
+                        <h1 class="text-lg font-bold leading-tight" data-i18n="title">AI对汽车行业就业市场的冲击</h1>
+                    </div>
+                    <div class="flex gap-1 bg-[#1a1a24] rounded p-1">
+                        <button id="lang-zh" class="lang-btn active px-2 py-1 rounded text-xs font-medium">中</button>
+                        <button id="lang-en" class="lang-btn px-2 py-1 rounded text-xs font-medium">EN</button>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500" data-i18n="subtitle">50个职业 · 面积 = 就业人数 · 颜色 = AI暴露度</p>
+                <div class="flex items-center gap-2 mt-3 text-xs text-gray-400">
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-green-500"></span><span data-i18n="lowExposure">低暴露</span></span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span data-i18n="mediumExposure">中暴露</span></span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-600"></span><span data-i18n="highExposure">高暴露</span></span>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-5">
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2" data-i18n="areaLabel">面积表示</h3>
+                    <div class="space-y-1.5">
+                        <button id="areaBtn-employment" class="w-full text-left px-3 py-2 bg-[#1a1a24] rounded border border-[#2a2a35] text-sm font-medium" data-i18n="employment">就业人数</button>
+                        <button id="areaBtn-salary" class="w-full text-left px-3 py-2 bg-transparent rounded border border-transparent text-sm text-gray-400 hover:text-gray-200" data-i18n="salary">薪资总额</button>
+                        <button id="areaBtn-demand" class="w-full text-left px-3 py-2 bg-transparent rounded border border-transparent text-sm text-gray-400 hover:text-gray-200" data-i18n="demand">招聘需求</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2" data-i18n="totalEmploymentLabel">总就业人数</h3>
+                    <p id="totalEmployment" class="text-3xl font-bold text-white">--</p>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2" data-i18n="avgExposureLabel">加权平均暴露度</h3>
+                    <p id="avgExposure" class="text-3xl font-bold text-yellow-500">--</p>
+                    <p class="text-xs text-gray-500 mt-1" data-i18n="weightedNote">按面积加权，0-10 分</p>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2" data-i18n="riskIndexLabel">AI风险指数</h3>
+                    <p id="riskIndex" class="text-3xl font-bold text-red-500">--</p>
+                    <p class="text-xs text-gray-500 mt-1" data-i18n="riskNote">综合评估，1-100 分</p>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2" data-i18n="distributionLabel">就业人数按暴露度分布</h3>
+                    <div class="space-y-1.5">
+                        <div class="flex items-center gap-2"><div class="flex-1 h-1.5 bg-[#1a1a24] rounded overflow-hidden"><div id="bar1" class="h-full bg-green-500 progress-bar"></div></div></div>
+                        <div class="flex items-center gap-2"><div class="flex-1 h-1.5 bg-[#1a1a24] rounded overflow-hidden"><div id="bar2" class="h-full bg-green-600 progress-bar"></div></div></div>
+                        <div class="flex items-center gap-2"><div class="flex-1 h-1.5 bg-[#1a1a24] rounded overflow-hidden"><div id="bar3" class="h-full bg-yellow-500 progress-bar"></div></div></div>
+                        <div class="flex items-center gap-2"><div class="flex-1 h-1.5 bg-[#1a1a24] rounded overflow-hidden"><div id="bar4" class="h-full bg-orange-500 progress-bar"></div></div></div>
+                        <div class="flex items-center gap-2"><div class="flex-1 h-1.5 bg-[#1a1a24] rounded overflow-hidden"><div id="bar5" class="h-full bg-red-600 progress-bar"></div></div></div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2" data-i18n="categoryLabel">分级概览</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-green-500"></div><span class="text-gray-400 w-16" data-i18n="cat1">极低 (0-2)</span><span id="cat1Count" class="text-white"></span><span id="cat1Percent" class="text-gray-500 ml-auto"></span></div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-green-600"></div><span class="text-gray-400 w-16" data-i18n="cat2">低 (2-4)</span><span id="cat2Count" class="text-white"></span><span id="cat2Percent" class="text-gray-500 ml-auto"></span></div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-yellow-500"></div><span class="text-gray-400 w-16" data-i18n="cat3">中等 (4-6)</span><span id="cat3Count" class="text-white"></span><span id="cat3Percent" class="text-gray-500 ml-auto"></span></div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-orange-500"></div><span class="text-gray-400 w-16" data-i18n="cat4">高 (6-8)</span><span id="cat4Count" class="text-white"></span><span id="cat4Percent" class="text-gray-500 ml-auto"></span></div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-red-600"></div><span class="text-gray-400 w-16" data-i18n="cat5">极高 (8-10)</span><span id="cat5Count" class="text-white"></span><span id="cat5Percent" class="text-gray-500 ml-auto"></span></div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2" data-i18n="filterLabel">筛选条件</h3>
+                    <div class="space-y-2">
+                        <select id="filterCategory" class="w-full px-3 py-2 bg-[#1a1a24] rounded border border-[#2a2a35] text-sm text-white focus:outline-none focus:border-blue-500">
+                            <option value="all" data-i18n="allCategories">全部分类</option>
+                            <option value="研发">研发</option>
+                            <option value="项目管理">项目管理</option>
+                            <option value="工程技术">工程技术</option>
+                            <option value="生产制造">生产制造</option>
+                            <option value="供应链采购">供应链采购</option>
+                            <option value="营销销售">营销销售</option>
+                            <option value="售后技术">售后技术</option>
+                            <option value="职能管理">职能管理</option>
+                            <option value="零部件配套">零部件配套</option>
+                            <option value="新势力特色">新势力特色</option>
+                            <option value="商用车专项">商用车专项</option>
+                        </select>
+                        <select id="filterRisk" class="w-full px-3 py-2 bg-[#1a1a24] rounded border border-[#2a2a35] text-sm text-white focus:outline-none focus:border-blue-500">
+                            <option value="all" data-i18n="allRisks">全部风险等级</option>
+                            <option value="low" data-i18n="lowRisk">低风险 (0-4)</option>
+                            <option value="medium" data-i18n="mediumRisk">中风险 (4-7)</option>
+                            <option value="high" data-i18n="highRisk">高风险 (7-10)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <button id="exportBtn" class="ripple w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium text-white transition-all duration-300 transform hover:scale-105 active:scale-95" data-i18n="exportData">导出数据 (CSV)</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 relative overflow-hidden bg-[#0a0a0f]">
+            <div id="loadingOverlay" class="absolute inset-0 bg-[#0a0a0f]/95 flex items-center justify-center z-50">
+                <div class="text-center">
+                    <div class="relative w-20 h-20 mx-auto mb-6">
+                        <div class="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div>
+                        <div class="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner"></div>
+                        <div class="absolute inset-2 border-4 border-purple-500/20 rounded-full"></div>
+                        <div class="absolute inset-2 border-4 border-purple-500 border-b-transparent rounded-full loading-spinner" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+                        <div class="absolute inset-4 border-4 border-cyan-500/20 rounded-full"></div>
+                        <div class="absolute inset-4 border-4 border-cyan-500 border-l-transparent rounded-full loading-spinner" style="animation-duration: 2s;"></div>
+                    </div>
+                    <p class="text-gray-400 text-lg font-medium" data-i18n="loading">正在加载数据...</p>
+                    <div class="mt-4 w-64 h-1 bg-[#1a1a24] rounded overflow-hidden">
+                        <div id="loadingBar" class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 progress-bar w-0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="treemap-container" class="w-full h-full"></div>
+
+            <div id="detailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay">
+                <div class="modal-content bg-[#0f0f16] border border-[#252535] rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden">
+                    <div class="p-6 border-b border-[#252535] flex items-center justify-between">
+                        <div>
+                            <h2 id="modalTitle" class="text-xl font-bold text-white"></h2>
+                            <span id="modalCategory" class="inline-block bg-blue-600/20 text-blue-400 px-2 py-1 rounded text-xs mt-2"></span>
+                        </div>
+                        <button id="closeModal" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    
+                    <div class="p-6 overflow-y-auto max-h-[calc(90vh-80px)] scrollbar-thin">
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="bg-[#1a1a24] rounded-lg p-4 stat-card">
+                                <p class="text-xs text-gray-400 mb-1" data-i18n="modalRiskIndex">AI风险指数</p>
+                                <p id="modalRiskIndex" class="text-2xl font-bold text-red-500"></p>
+                                <div class="mt-2 h-2 bg-[#2a2a35] rounded-full overflow-hidden">
+                                    <div id="riskBar" class="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500"></div>
+                                </div>
+                            </div>
+                            <div class="bg-[#1a1a24] rounded-lg p-4 stat-card">
+                                <p class="text-xs text-gray-400 mb-1" data-i18n="modalEmployment">就业人数</p>
+                                <p id="modalEmployment" class="text-2xl font-bold text-white"></p>
+                            </div>
+                            <div class="bg-[#1a1a24] rounded-lg p-4 stat-card">
+                                <p class="text-xs text-gray-400 mb-1" data-i18n="modalSalary">平均年薪</p>
+                                <p id="modalSalary" class="text-2xl font-bold text-yellow-500"></p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-[#1a1a24] rounded-lg p-4">
+                                <p class="text-xs text-gray-400 mb-2" data-i18n="affectedWork">受影响工作比例</p>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-1 h-8 bg-[#2a2a35] rounded-full overflow-hidden flex">
+                                        <div id="impactBar1" class="bg-red-500 flex items-center justify-end pr-2"><span id="impactValue1" class="text-xs text-white font-medium"></span></div>
+                                        <div id="impactBar2" class="bg-green-500"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-[#1a1a24] rounded-lg p-4">
+                                <p class="text-xs text-gray-400 mb-2" data-i18n="demandChange">招聘需求变化</p>
+                                <div class="flex items-center gap-3">
+                                    <span id="demandChange" class="text-xl font-bold"></span>
+                                    <span id="demandTrend" class="text-xs"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-sm font-semibold text-white mb-3" data-i18n="skillsCompare">技能需求变化对比</h3>
+                            <div class="bg-[#1a1a24] rounded-lg p-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-xs text-gray-500 mb-2" data-i18n="beforeAI">AI普及前</p>
+                                        <div id="skillsBefore" class="text-sm text-gray-300"></div>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500 mb-2" data-i18n="afterAI">AI普及后</p>
+                                        <div id="skillsAfter" class="text-sm text-gray-300"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-sm font-semibold text-white mb-3" data-i18n="trendTitle">5年岗位数量变化趋势</h3>
+                            <div class="bg-[#1a1a24] rounded-lg p-4">
+                                <div class="flex items-end justify-between h-24 gap-2">
+                                    <div class="flex-1 flex flex-col items-center"><div class="w-full bg-blue-600 rounded-t" id="trendBar1"></div><span class="text-xs text-gray-400 mt-1">2026</span></div>
+                                    <div class="flex-1 flex flex-col items-center"><div class="w-full bg-blue-500 rounded-t" id="trendBar2"></div><span class="text-xs text-gray-400 mt-1">2027</span></div>
+                                    <div class="flex-1 flex flex-col items-center"><div class="w-full bg-blue-400 rounded-t" id="trendBar3"></div><span class="text-xs text-gray-400 mt-1">2028</span></div>
+                                    <div class="flex-1 flex flex-col items-center"><div class="w-full bg-yellow-500 rounded-t" id="trendBar4"></div><span class="text-xs text-gray-400 mt-1">2029</span></div>
+                                    <div class="flex-1 flex flex-col items-center"><div class="w-full bg-red-500 rounded-t" id="trendBar5"></div><span class="text-xs text-gray-400 mt-1">2030</span></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-3 text-center" data-i18n="expertPredict">行业专家预测数据</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-sm font-semibold text-white mb-3" data-i18n="transformationTitle">转型建议与新兴相关职位</h3>
+                            <div class="bg-[#1a1a24] rounded-lg p-4">
+                                <p id="transformationAdvice" class="text-sm text-gray-300 mb-4"></p>
+                                <div class="space-y-2">
+                                    <p class="text-xs text-gray-400" data-i18n="recommended">推荐转型方向：</p>
+                                    <div id="relatedJobs" class="flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-sm font-semibold text-white mb-3" data-i18n="metricsTitle">评估指标详情</h3>
+                            <div class="bg-[#1a1a24] rounded-lg overflow-hidden">
+                                <table class="w-full text-sm">
+                                    <tbody>
+                                        <tr class="border-b border-[#2a2a35]"><td class="px-4 py-3 text-gray-400" data-i18n="metric1">技术替代风险</td><td class="px-4 py-3 text-right"><span id="metric1" class="text-white"></span></td></tr>
+                                        <tr class="border-b border-[#2a2a35]"><td class="px-4 py-3 text-gray-400" data-i18n="metric2">工作流程变革</td><td class="px-4 py-3 text-right"><span id="metric2" class="text-white"></span></td></tr>
+                                        <tr class="border-b border-[#2a2a35]"><td class="px-4 py-3 text-gray-400" data-i18n="metric3">技能需求演变</td><td class="px-4 py-3 text-right"><span id="metric3" class="text-white"></span></td></tr>
+                                        <tr class="border-b border-[#2a2a35]"><td class="px-4 py-3 text-gray-400" data-i18n="metric4">薪资结构调整</td><td class="px-4 py-3 text-right"><span id="metric4" class="text-white"></span></td></tr>
+                                        <tr><td class="px-4 py-3 text-gray-400" data-i18n="metric5">就业市场供需</td><td class="px-4 py-3 text-right"><span id="metric5" class="text-white"></span></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button id="compareBtn" class="ripple flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium text-white transition-all duration-300 transform hover:scale-105 active:scale-95" data-i18n="addToCompare">添加到对比</button>
+                            <button id="exportSingleBtn" class="ripple flex-1 px-4 py-2 bg-[#1a1a24] hover:bg-[#2a2a35] border border-[#2a2a35] rounded text-sm font-medium text-white transition-all duration-300 transform hover:scale-105 active:scale-95" data-i18n="exportSingle">导出此职位数据</button>
+                        </div>
+
+                        <div class="mt-4 text-xs text-gray-500 text-center" data-i18n="dataSource">数据来源：汽车行业人力资源经理人组织 · 统计周期：2026年</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="comparePanel" class="hidden fixed bottom-0 left-[288px] right-0 bg-[#0f0f16]/95 border-t border-[#252535] p-4 z-40">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold text-white" data-i18n="compareTitle">职位对比</h3>
+                    <button id="clearCompare" class="text-xs text-gray-400 hover:text-white" data-i18n="clearCompare">清空对比</button>
+                </div>
+                <div id="compareItems" class="flex gap-3 overflow-x-auto"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const translations = {
+            zh: {
+                title: 'AI对汽车行业就业市场的冲击',
+                subtitle: '50个职业 · 面积 = 就业人数 · 颜色 = AI暴露度',
+                lowExposure: '低暴露',
+                mediumExposure: '中暴露',
+                highExposure: '高暴露',
+                areaLabel: '面积表示',
+                employment: '就业人数',
+                salary: '薪资总额',
+                demand: '招聘需求',
+                totalEmploymentLabel: '总就业人数',
+                avgExposureLabel: '加权平均暴露度',
+                weightedNote: '按面积加权，0-10 分',
+                riskIndexLabel: 'AI风险指数',
+                riskNote: '综合评估，1-100 分',
+                distributionLabel: '就业人数按暴露度分布',
+                categoryLabel: '分级概览',
+                cat1: '极低 (0-2)',
+                cat2: '低 (2-4)',
+                cat3: '中等 (4-6)',
+                cat4: '高 (6-8)',
+                cat5: '极高 (8-10)',
+                filterLabel: '筛选条件',
+                allCategories: '全部分类',
+                allRisks: '全部风险等级',
+                lowRisk: '低风险 (0-4)',
+                mediumRisk: '中风险 (4-7)',
+                highRisk: '高风险 (7-10)',
+                exportData: '导出数据 (CSV)',
+                loading: '正在加载数据...',
+                noData: '暂无数据',
+                risk: '风险',
+                people: '人',
+                perYear: '/年',
+                demandGrowth: '需求增长',
+                demandDecline: '需求下降',
+                expertPredict: '行业专家预测数据',
+                recommended: '推荐转型方向：',
+                addToCompare: '添加到对比',
+                removeFromCompare: '从对比移除',
+                exportSingle: '导出此职位数据',
+                dataSource: '数据来源：汽车行业人力资源经理人组织 · 统计周期：2026年',
+                compareTitle: '职位对比',
+                clearCompare: '清空对比',
+                研发: '研发',
+                '项目管理': '项目管理',
+                '工程技术': '工程技术',
+                '生产制造': '生产制造',
+                '供应链采购': '供应链采购',
+                '营销销售': '营销销售',
+                '售后技术': '售后技术',
+                '职能管理': '职能管理',
+                '零部件配套': '零部件配套',
+                '新势力特色': '新势力特色',
+                '商用车专项': '商用车专项',
+                modalRiskIndex: 'AI风险指数',
+                modalEmployment: '就业人数',
+                modalSalary: '平均年薪',
+                affectedWork: '受影响工作比例',
+                demandChange: '招聘需求变化',
+                skillsCompare: '技能需求变化对比',
+                beforeAI: 'AI普及前',
+                afterAI: 'AI普及后',
+                trendTitle: '5年岗位数量变化趋势',
+                transformationTitle: '转型建议与新兴相关职位',
+                metricsTitle: '评估指标详情',
+                metric1: '技术替代风险',
+                metric2: '工作流程变革',
+                metric3: '技能需求演变',
+                metric4: '薪资结构调整',
+                metric5: '就业市场供需'
+            },
+            en: {
+                title: 'Impact of AI on Automotive Industry Employment',
+                subtitle: '50 occupations · Area = Employment · Color = AI Exposure',
+                lowExposure: 'Low',
+                mediumExposure: 'Medium',
+                highExposure: 'High',
+                areaLabel: 'Area represents',
+                employment: 'Employment',
+                salary: 'Total Salary',
+                demand: 'Hiring Demand',
+                totalEmploymentLabel: 'Total Employment',
+                avgExposureLabel: 'Weighted Avg Exposure',
+                weightedNote: 'Area weighted, 0-10 scale',
+                riskIndexLabel: 'AI Risk Index',
+                riskNote: 'Comprehensive score, 1-100',
+                distributionLabel: 'Employment by Exposure',
+                categoryLabel: 'Category Overview',
+                cat1: 'Very Low (0-2)',
+                cat2: 'Low (2-4)',
+                cat3: 'Medium (4-6)',
+                cat4: 'High (6-8)',
+                cat5: 'Very High (8-10)',
+                filterLabel: 'Filters',
+                allCategories: 'All Categories',
+                allRisks: 'All Risk Levels',
+                lowRisk: 'Low Risk (0-4)',
+                mediumRisk: 'Medium Risk (4-7)',
+                highRisk: 'High Risk (7-10)',
+                exportData: 'Export Data (CSV)',
+                loading: 'Loading data...',
+                noData: 'No data',
+                risk: 'Risk',
+                people: 'people',
+                perYear: '/year',
+                demandGrowth: 'Growing demand',
+                demandDecline: 'Declining demand',
+                expertPredict: 'Industry expert predictions',
+                recommended: 'Recommended directions:',
+                addToCompare: 'Add to Compare',
+                removeFromCompare: 'Remove from Compare',
+                exportSingle: 'Export This Position',
+                dataSource: 'Source: Automotive HR Managers Organization · 2026',
+                compareTitle: 'Position Comparison',
+                clearCompare: 'Clear All',
+                研发: 'R&D',
+                '项目管理': 'Project Management',
+                '工程技术': 'Engineering',
+                '生产制造': 'Manufacturing',
+                '供应链采购': 'Supply Chain & Procurement',
+                '营销销售': 'Marketing & Sales',
+                '售后技术': 'After-Sales Service',
+                '职能管理': 'Administration',
+                '零部件配套': 'Components & Parts',
+                '新势力特色': 'New Energy Specialties',
+                '商用车专项': 'Commercial Vehicles',
+                modalRiskIndex: 'AI Risk Index',
+                modalEmployment: 'Employment',
+                modalSalary: 'Avg Annual Salary',
+                affectedWork: 'Affected Work Ratio',
+                demandChange: 'Hiring Demand Change',
+                skillsCompare: 'Skills Requirement Comparison',
+                beforeAI: 'Before AI',
+                afterAI: 'After AI',
+                trendTitle: '5-Year Position Trend',
+                transformationTitle: 'Transformation Advice & Related Roles',
+                metricsTitle: 'Evaluation Metrics',
+                metric1: 'Tech Replacement Risk',
+                metric2: 'Workflow Transformation',
+                metric3: 'Skills Evolution',
+                metric4: 'Salary Adjustment',
+                metric5: 'Market Supply & Demand'
+            }
+        };
+
+        const occupations = [
+            { id: "rd-director", title: "研发总监", titleEn: "R&D Director", category: "研发", employment: 80000, medianPay: 550000, education: "硕士", experience: "10年+", aiExposure: 2.5, aiRiskIndex: 25, affectedWorkRatio: 20, demandChange: 15, skillsBefore: ["战略规划", "团队管理", "技术决策", "资源调配"], skillsBeforeEn: ["Strategic Planning", "Team Management", "Tech Decision", "Resource Allocation"], skillsAfter: ["AI战略规划", "智能资源分配", "AI投资决策", "敏捷研发管理"], skillsAfterEn: ["AI Strategic Planning", "Intelligent Resource Allocation", "AI Investment Decisions", "Agile R&D Management"], trendData: [100, 108, 112, 115, 120], transformationAdvice: "学习AI战略规划、智能研发管理工具，关注AI技术趋势。", transformationAdviceEn: "Learn AI strategic planning, intelligent R&D management tools, and follow AI tech trends.", relatedJobs: ["AI战略顾问", "智能研发总监", "数字化转型官"], relatedJobsEn: ["AI Strategy Consultant", "Intelligent R&D Director", "Digital Transformation Officer"], metrics: { techRisk: 22, workflowChange: 28, skillEvolution: 45, salaryAdjustment: 55, supplyDemand: 45 }},
+            { id: "chief-scientist", title: "首席科学家/专家", titleEn: "Chief Scientist/Expert", category: "研发", employment: 15000, medianPay: 620000, education: "博士", experience: "15年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 40, demandChange: 25, skillsBefore: ["前沿研究", "技术突破", "科研管理", "学术引领"], skillsBeforeEn: ["Cutting-edge Research", "Tech Breakthroughs", "Research Management", "Academic Leadership"], skillsAfter: ["AI辅助研究", "大模型应用", "AI科研工具", "跨学科AI融合"], skillsAfterEn: ["AI-assisted Research", "LLM Applications", "AI Research Tools", "Interdisciplinary AI Integration"], trendData: [100, 115, 130, 145, 160], transformationAdvice: "深入学习大模型、AI科研工具，关注AI与汽车技术的融合。", transformationAdviceEn: "Deepen knowledge of LLMs, AI research tools, and AI-automotive integration.", relatedJobs: ["AI首席科学家", "智能网联专家", "新能源AI研究员"], relatedJobsEn: ["Chief AI Scientist", "Intelligent Connected Expert", "New Energy AI Researcher"], metrics: { techRisk: 45, workflowChange: 48, skillEvolution: 75, salaryAdjustment: 70, supplyDemand: 35 }},
+            { id: "vehicle-architect", title: "整车架构师", titleEn: "Vehicle Architect", category: "研发", employment: 35000, medianPay: 480000, education: "硕士", experience: "8年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 45, demandChange: 18, skillsBefore: ["架构设计", "系统集成", "平台规划", "成本优化"], skillsBeforeEn: ["Architecture Design", "System Integration", "Platform Planning", "Cost Optimization"], skillsAfter: ["AI辅助架构", "智能网联架构", "数字孪生平台", "AI优化设计"], skillsAfterEn: ["AI-assisted Architecture", "Intelligent Connected Architecture", "Digital Twin Platform", "AI Optimized Design"], trendData: [100, 108, 118, 125, 132], transformationAdvice: "学习AI辅助设计工具、数字孪生、智能网联架构。", transformationAdviceEn: "Learn AI-assisted design tools, digital twins, and intelligent connected architectures.", relatedJobs: ["智能架构师", "数字孪生专家", "网联汽车架构师"], relatedJobsEn: ["Intelligent Architect", "Digital Twin Expert", "Connected Vehicle Architect"], metrics: { techRisk: 52, workflowChange: 55, skillEvolution: 70, salaryAdjustment: 65, supplyDemand: 42 }},
+            { id: "ad-algo-engineer", title: "智能驾驶算法工程师", titleEn: "AD Algorithm Engineer", category: "研发", employment: 120000, medianPay: 450000, education: "硕士", experience: "3年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 40, demandChange: 30, skillsBefore: ["机器学习", "计算机视觉", "路径规划", "控制算法"], skillsBeforeEn: ["Machine Learning", "Computer Vision", "Path Planning", "Control Algorithms"], skillsAfter: ["大模型决策", "端到端学习", "AI仿真优化", "多模态融合"], skillsAfterEn: ["LLM Decision Making", "End-to-end Learning", "AI Simulation Optimization", "Multimodal Fusion"], trendData: [100, 120, 140, 160, 180], transformationAdvice: "深入学习大模型、多模态融合、端到端自动驾驶技术。", transformationAdviceEn: "Deepen knowledge of LLMs, multimodal fusion, and end-to-end autonomous driving.", relatedJobs: ["大模型驾驶工程师", "多模态感知专家", "AI仿真工程师"], relatedJobsEn: ["LLM Driving Engineer", "Multimodal Perception Expert", "AI Simulation Engineer"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 80, salaryAdjustment: 72, supplyDemand: 30 }},
+            { id: "ad-system-engineer", title: "智能驾驶系统工程师", titleEn: "AD Systems Engineer", category: "研发", employment: 85000, medianPay: 420000, education: "本科", experience: "5年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 38, demandChange: 28, skillsBefore: ["系统集成", "功能安全", "测试验证", "软件开发"], skillsBeforeEn: ["System Integration", "Functional Safety", "Testing & Verification", "Software Development"], skillsAfter: ["AI系统集成", "AI安全验证", "智能测试", "边缘AI部署"], skillsAfterEn: ["AI System Integration", "AI Safety Verification", "Intelligent Testing", "Edge AI Deployment"], trendData: [100, 118, 135, 150, 165], transformationAdvice: "学习AI系统集成、功能安全与AI结合、智能测试技术。", transformationAdviceEn: "Learn AI system integration, functional safety with AI, and intelligent testing.", relatedJobs: ["智能驾驶系统专家", "AI功能安全工程师", "边缘AI工程师"], relatedJobsEn: ["Intelligent AD System Expert", "AI Functional Safety Engineer", "Edge AI Engineer"], metrics: { techRisk: 42, workflowChange: 48, skillEvolution: 68, salaryAdjustment: 68, supplyDemand: 38 }},
+            { id: "cockpit-engineer", title: "智能座舱工程师", titleEn: "Intelligent Cockpit Engineer", category: "研发", employment: 95000, medianPay: 320000, education: "本科", experience: "3年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: 32, skillsBefore: ["HMI设计", "UI开发", "座舱软件", "交互设计"], skillsBeforeEn: ["HMI Design", "UI Development", "Cockpit Software", "Interaction Design"], skillsAfter: ["AI交互设计", "大语言模型座舱", "个性化AI", "多模态交互"], skillsAfterEn: ["AI Interaction Design", "LLM Cockpit", "Personalized AI", "Multimodal Interaction"], trendData: [100, 122, 145, 165, 185], transformationAdvice: "学习AI交互设计、大语言模型应用、个性化推荐系统。", transformationAdviceEn: "Learn AI interaction design, LLM applications, and personalized recommendation systems.", relatedJobs: ["AI座舱设计师", "多模态交互工程师", "个性化体验专家"], relatedJobsEn: ["AI Cockpit Designer", "Multimodal Interaction Engineer", "Personalization Experience Expert"], metrics: { techRisk: 48, workflowChange: 52, skillEvolution: 75, salaryAdjustment: 70, supplyDemand: 35 }},
+            { id: "ota-engineer", title: "OTA开发工程师", titleEn: "OTA Developer", category: "研发", employment: 55000, medianPay: 300000, education: "本科", experience: "3年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 52, demandChange: 20, skillsBefore: ["固件开发", "远程升级", "版本管理", "安全加密"], skillsBeforeEn: ["Firmware Development", "Remote Updates", "Version Control", "Security Encryption"], skillsAfter: ["AI更新策略", "智能升级优化", "AI安全监控", "预测性升级"], skillsAfterEn: ["AI Update Strategy", "Intelligent Update Optimization", "AI Security Monitoring", "Predictive Updates"], trendData: [100, 112, 122, 130, 135], transformationAdvice: "学习AI更新策略优化、智能安全监控、预测性维护。", transformationAdviceEn: "Learn AI update strategy optimization, intelligent security monitoring, and predictive maintenance.", relatedJobs: ["智能OTA工程师", "AI安全专家", "预测性维护工程师"], relatedJobsEn: ["Intelligent OTA Engineer", "AI Security Expert", "Predictive Maintenance Engineer"], metrics: { techRisk: 58, workflowChange: 55, skillEvolution: 70, salaryAdjustment: 62, supplyDemand: 45 }},
+            { id: "battery-engineer", title: "电池工程师(电芯/热管理)", titleEn: "Battery Engineer (Cell/Thermal)", category: "研发", employment: 130000, medianPay: 320000, education: "硕士", experience: "3年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 38, demandChange: 35, skillsBefore: ["电芯设计", "热管理", "电池材料", "BMS开发"], skillsBeforeEn: ["Cell Design", "Thermal Management", "Battery Materials", "BMS Development"], skillsAfter: ["AI材料设计", "智能热管理", "AI寿命预测", "优化BMS"], skillsAfterEn: ["AI Material Design", "Intelligent Thermal Management", "AI Life Prediction", "Optimized BMS"], trendData: [100, 125, 150, 175, 200], transformationAdvice: "学习AI辅助材料设计、智能热管理优化、寿命预测AI。", transformationAdviceEn: "Learn AI-assisted material design, intelligent thermal management, and life prediction AI.", relatedJobs: ["AI电池设计师", "智能热管理专家", "电池AI研究员"], relatedJobsEn: ["AI Battery Designer", "Intelligent Thermal Management Expert", "Battery AI Researcher"], metrics: { techRisk: 42, workflowChange: 45, skillEvolution: 72, salaryAdjustment: 68, supplyDemand: 32 }},
+            { id: "ecu-engineer", title: "电控工程师", titleEn: "ECU Engineer", category: "研发", employment: 110000, medianPay: 300000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 15, skillsBefore: ["电机控制", "MCU开发", "算法实现", "硬件适配"], skillsBeforeEn: ["Motor Control", "MCU Development", "Algorithm Implementation", "Hardware Adaptation"], skillsAfter: ["AI控制优化", "预测性控制", "自适应算法", "智能诊断"], skillsAfterEn: ["AI Control Optimization", "Predictive Control", "Adaptive Algorithms", "Intelligent Diagnostics"], trendData: [100, 108, 115, 120, 125], transformationAdvice: "学习AI控制算法、预测性控制、自适应系统。", transformationAdviceEn: "Learn AI control algorithms, predictive control, and adaptive systems.", relatedJobs: ["智能电控工程师", "AI控制专家", "自适应控制工程师"], relatedJobsEn: ["Intelligent ECU Engineer", "AI Control Expert", "Adaptive Control Engineer"], metrics: { techRisk: 52, workflowChange: 50, skillEvolution: 68, salaryAdjustment: 62, supplyDemand: 48 }},
+            { id: "motor-engineer", title: "电机工程师", titleEn: "Motor Engineer", category: "研发", employment: 85000, medianPay: 270000, education: "硕士", experience: "3年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: 12, skillsBefore: ["电机设计", "磁路分析", "NVH优化", "性能测试"], skillsBeforeEn: ["Motor Design", "Magnetic Circuit Analysis", "NVH Optimization", "Performance Testing"], skillsAfter: ["AI优化设计", "电磁仿真AI", "性能预测", "智能测试"], skillsAfterEn: ["AI Optimized Design", "Electromagnetic Simulation AI", "Performance Prediction", "Intelligent Testing"], trendData: [100, 105, 110, 115, 118], transformationAdvice: "学习AI辅助设计、电磁仿真AI、性能预测模型。", transformationAdviceEn: "Learn AI-assisted design, electromagnetic simulation AI, and performance prediction models.", relatedJobs: ["AI电机设计师", "智能仿真工程师", "电机AI优化专家"], relatedJobsEn: ["AI Motor Designer", "Intelligent Simulation Engineer", "Motor AI Optimization Expert"], metrics: { techRisk: 48, workflowChange: 48, skillEvolution: 65, salaryAdjustment: 60, supplyDemand: 52 }},
+            { id: "power-bms-engineer", title: "电源/BMS工程师", titleEn: "Power/BMS Engineer", category: "研发", employment: 78000, medianPay: 310000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 22, skillsBefore: ["BMS设计", "电池管理", "电源系统", "安全保护"], skillsBeforeEn: ["BMS Design", "Battery Management", "Power Systems", "Safety Protection"], skillsAfter: ["AI电池管理", "智能SOC估算", "预测性维护", "云端BMS"], skillsAfterEn: ["AI Battery Management", "Intelligent SOC Estimation", "Predictive Maintenance", "Cloud BMS"], trendData: [100, 112, 122, 132, 142], transformationAdvice: "学习AI电池管理算法、云端监控平台、智能诊断技术。", transformationAdviceEn: "Learn AI battery management algorithms, cloud monitoring platforms, and intelligent diagnostics.", relatedJobs: ["AI BMS专家", "智能电源工程师", "云端电池管理师"], relatedJobsEn: ["AI BMS Expert", "Intelligent Power Engineer", "Cloud Battery Manager"], metrics: { techRisk: 52, workflowChange: 50, skillEvolution: 70, salaryAdjustment: 65, supplyDemand: 40 }},
+            { id: "vehicle-integration", title: "整车集成/总布置", titleEn: "Vehicle Integration Engineer", category: "研发", employment: 65000, medianPay: 280000, education: "本科", experience: "5年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 45, demandChange: 10, skillsBefore: ["总布置设计", "空间优化", "人机工程", "法规符合"], skillsBeforeEn: ["Package Design", "Space Optimization", "Ergonomics", "Regulatory Compliance"], skillsAfter: ["AI总布置优化", "数字孪生验证", "智能人机工程", "AI合规检查"], skillsAfterEn: ["AI Package Optimization", "Digital Twin Verification", "Intelligent Ergonomics", "AI Compliance Check"], trendData: [100, 105, 110, 115, 120], transformationAdvice: "学习AI优化设计工具、数字孪生技术、智能人机工程学。", transformationAdviceEn: "Learn AI optimization tools, digital twin technology, and intelligent ergonomics.", relatedJobs: ["AI总布置专家", "数字孪生工程师", "智能人机工程师"], relatedJobsEn: ["AI Package Expert", "Digital Twin Engineer", "Intelligent Ergonomics Engineer"], metrics: { techRisk: 48, workflowChange: 52, skillEvolution: 68, salaryAdjustment: 62, supplyDemand: 50 }},
+            { id: "chassis-engineer", title: "底盘工程师", titleEn: "Chassis Engineer", category: "研发", employment: 85000, medianPay: 270000, education: "本科", experience: "3年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 40, demandChange: 8, skillsBefore: ["底盘设计", "悬架系统", "转向系统", "制动系统"], skillsBeforeEn: ["Chassis Design", "Suspension Systems", "Steering Systems", "Brake Systems"], skillsAfter: ["AI底盘设计", "智能悬架控制", "线控底盘", "AI性能优化"], skillsAfterEn: ["AI Chassis Design", "Intelligent Suspension Control", "X-by-wire Chassis", "AI Performance Optimization"], trendData: [100, 104, 108, 112, 115], transformationAdvice: "学习AI辅助设计、智能底盘控制系统、线控技术。", transformationAdviceEn: "Learn AI-assisted design, intelligent chassis control systems, and x-by-wire technology.", relatedJobs: ["AI底盘专家", "智能悬架工程师", "线控底盘工程师"], relatedJobsEn: ["AI Chassis Expert", "Intelligent Suspension Engineer", "X-by-wire Chassis Engineer"], metrics: { techRisk: 42, workflowChange: 46, skillEvolution: 62, salaryAdjustment: 58, supplyDemand: 55 }},
+            { id: "body-engineer", title: "车身工程师", titleEn: "Body Engineer", category: "研发", employment: 78000, medianPay: 260000, education: "本科", experience: "3年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 45, demandChange: 10, skillsBefore: ["车身设计", "结构分析", "材料应用", "工艺规划"], skillsBeforeEn: ["Body Design", "Structural Analysis", "Material Application", "Process Planning"], skillsAfter: ["AI车身设计", "轻量化优化", "智能材料选择", "AI工艺规划"], skillsAfterEn: ["AI Body Design", "Lightweight Optimization", "Intelligent Material Selection", "AI Process Planning"], trendData: [100, 105, 110, 115, 120], transformationAdvice: "学习AI辅助设计、轻量化技术、智能材料工程。", transformationAdviceEn: "Learn AI-assisted design, lightweight technology, and intelligent material engineering.", relatedJobs: ["AI车身专家", "轻量化工程师", "智能材料工程师"], relatedJobsEn: ["AI Body Expert", "Lightweight Engineer", "Smart Material Engineer"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 65, salaryAdjustment: 60, supplyDemand: 52 }},
+            { id: "styling-designer", title: "汽车造型设计师", titleEn: "Automotive Styling Designer", category: "研发", employment: 45000, medianPay: 320000, education: "本科", experience: "3年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 35, demandChange: 5, skillsBefore: ["造型设计", "油泥模型", "效果图绘制", "设计方案"], skillsBeforeEn: ["Styling Design", "Clay Modeling", "Rendering", "Design Concept"], skillsAfter: ["AI辅助造型", "生成式设计", "参数化设计", "AI渲染"], skillsAfterEn: ["AI-assisted Styling", "Generative Design", "Parametric Design", "AI Rendering"], trendData: [100, 103, 106, 108, 110], transformationAdvice: "学习AI辅助设计工具、生成式设计、参数化建模。", transformationAdviceEn: "Learn AI-assisted design tools, generative design, and parametric modeling.", relatedJobs: ["AI造型设计师", "生成式设计师", "参数化设计专家"], relatedJobsEn: ["AI Styling Designer", "Generative Designer", "Parametric Design Expert"], metrics: { techRisk: 40, workflowChange: 45, skillEvolution: 60, salaryAdjustment: 55, supplyDemand: 58 }},
+            { id: "interior-exterior-engineer", title: "内外饰工程师", titleEn: "Interior/Exterior Engineer", category: "研发", employment: 68000, medianPay: 240000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 50, demandChange: 5, skillsBefore: ["内外饰设计", "材料选用", "工艺规划", "成本控制"], skillsBeforeEn: ["Interior/Exterior Design", "Material Selection", "Process Planning", "Cost Control"], skillsAfter: ["AI内外饰设计", "智能材料推荐", "AI成本优化", "个性化定制"], skillsAfterEn: ["AI Interior/Exterior Design", "Intelligent Material Recommendation", "AI Cost Optimization", "Personalized Customization"], trendData: [100, 103, 105, 108, 110], transformationAdvice: "学习AI设计工具、智能材料推荐系统、个性化定制技术。", transformationAdviceEn: "Learn AI design tools, intelligent material recommendation systems, and personalization technology.", relatedJobs: ["AI内外饰专家", "智能材料工程师", "个性化定制设计师"], relatedJobsEn: ["AI Interior/Exterior Expert", "Smart Material Engineer", "Personalization Designer"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 68, salaryAdjustment: 58, supplyDemand: 55 }},
+            { id: "auto-electronics-engineer", title: "汽车电子/嵌入式工程师", titleEn: "Automotive Electronics/Embedded Engineer", category: "研发", employment: 100000, medianPay: 290000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 18, skillsBefore: ["嵌入式开发", "硬件设计", "驱动开发", "协议栈"], skillsBeforeEn: ["Embedded Development", "Hardware Design", "Driver Development", "Protocol Stack"], skillsAfter: ["AI嵌入式优化", "边缘AI部署", "智能硬件设计", "AI代码生成"], skillsAfterEn: ["AI Embedded Optimization", "Edge AI Deployment", "Intelligent Hardware Design", "AI Code Generation"], trendData: [100, 108, 118, 128, 138], transformationAdvice: "学习边缘AI部署、智能硬件设计、AI辅助编程。", transformationAdviceEn: "Learn edge AI deployment, intelligent hardware design, and AI-assisted programming.", relatedJobs: ["边缘AI工程师", "智能嵌入式专家", "AI硬件工程师"], relatedJobsEn: ["Edge AI Engineer", "Intelligent Embedded Expert", "AI Hardware Engineer"], metrics: { techRisk: 52, workflowChange: 50, skillEvolution: 72, salaryAdjustment: 65, supplyDemand: 42 }},
+            { id: "domain-controller-engineer", title: "车载软件/域控工程师", titleEn: "In-vehicle Software/Domain Controller Engineer", category: "研发", employment: 88000, medianPay: 310000, education: "本科", experience: "3年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 52, demandChange: 25, skillsBefore: ["域控制器开发", "软件架构", "中间件开发", "系统集成"], skillsBeforeEn: ["Domain Controller Development", "Software Architecture", "Middleware Development", "System Integration"], skillsAfter: ["AI软件架构", "智能中间件", "AI代码生成", "自动代码审查"], skillsAfterEn: ["AI Software Architecture", "Intelligent Middleware", "AI Code Generation", "Automated Code Review"], trendData: [100, 115, 130, 145, 160], transformationAdvice: "深入学习AI辅助编程、智能软件架构、代码生成工具。", transformationAdviceEn: "Deepen knowledge of AI-assisted programming, intelligent software architecture, and code generation tools.", relatedJobs: ["AI软件架构师", "智能域控专家", "代码生成工程师"], relatedJobsEn: ["AI Software Architect", "Intelligent Domain Controller Expert", "Code Generation Engineer"], metrics: { techRisk: 58, workflowChange: 55, skillEvolution: 75, salaryAdjustment: 70, supplyDemand: 35 }},
+            { id: "cae-simulation-engineer", title: "CAE仿真工程师", titleEn: "CAE Simulation Engineer", category: "研发", employment: 62000, medianPay: 290000, education: "硕士", experience: "3年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 55, demandChange: 20, skillsBefore: ["有限元分析", "流体仿真", "碰撞仿真", "NVH分析"], skillsBeforeEn: ["FEA", "CFD", "Crash Simulation", "NVH Analysis"], skillsAfter: ["AI仿真优化", "智能参数设置", "预测性分析", "自动报告生成"], skillsAfterEn: ["AI Simulation Optimization", "Intelligent Parameter Setting", "Predictive Analysis", "Automated Report Generation"], trendData: [100, 112, 122, 130, 135], transformationAdvice: "学习AI仿真优化、智能参数设置、预测性分析方法。", transformationAdviceEn: "Learn AI simulation optimization, intelligent parameter settings, and predictive analysis methods.", relatedJobs: ["AI仿真专家", "智能分析工程师", "预测性仿真工程师"], relatedJobsEn: ["AI Simulation Expert", "Intelligent Analysis Engineer", "Predictive Simulation Engineer"], metrics: { techRisk: 58, workflowChange: 55, skillEvolution: 75, salaryAdjustment: 65, supplyDemand: 42 }},
+            { id: "nvh-engineer", title: "NVH工程师", titleEn: "NVH Engineer", category: "研发", employment: 55000, medianPay: 280000, education: "硕士", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 50, demandChange: 5, skillsBefore: ["NVH分析", "振动测试", "声学仿真", "故障诊断"], skillsBeforeEn: ["NVH Analysis", "Vibration Testing", "Acoustic Simulation", "Fault Diagnosis"], skillsAfter: ["AI NVH分析", "智能声学设计", "预测性诊断", "AI测试优化"], skillsAfterEn: ["AI NVH Analysis", "Intelligent Acoustic Design", "Predictive Diagnosis", "AI Testing Optimization"], trendData: [100, 102, 105, 108, 110], transformationAdvice: "学习AI声学分析、预测性故障诊断、智能测试技术。", transformationAdviceEn: "Learn AI acoustic analysis, predictive fault diagnosis, and intelligent testing technology.", relatedJobs: ["AI NVH专家", "智能声学工程师", "预测性诊断工程师"], relatedJobsEn: ["AI NVH Expert", "Intelligent Acoustic Engineer", "Predictive Diagnosis Engineer"], metrics: { techRisk: 52, workflowChange: 50, skillEvolution: 68, salaryAdjustment: 62, supplyDemand: 55 }},
+            { id: "safety-engineer", title: "汽车安全工程师", titleEn: "Automotive Safety Engineer", category: "研发", employment: 55000, medianPay: 290000, education: "硕士", experience: "5年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 38, demandChange: 15, skillsBefore: ["安全法规", "碰撞安全", "约束系统", "安全测试"], skillsBeforeEn: ["Safety Regulations", "Crash Safety", "Restraint Systems", "Safety Testing"], skillsAfter: ["AI安全分析", "智能安全设计", "AI碰撞仿真", "预测性安全评估"], skillsAfterEn: ["AI Safety Analysis", "Intelligent Safety Design", "AI Crash Simulation", "Predictive Safety Assessment"], trendData: [100, 108, 115, 122, 128], transformationAdvice: "学习AI安全分析、智能安全设计、虚拟测试技术。", transformationAdviceEn: "Learn AI safety analysis, intelligent safety design, and virtual testing technology.", relatedJobs: ["AI安全专家", "智能安全设计师", "虚拟测试工程师"], relatedJobsEn: ["AI Safety Expert", "Intelligent Safety Designer", "Virtual Testing Engineer"], metrics: { techRisk: 42, workflowChange: 48, skillEvolution: 65, salaryAdjustment: 65, supplyDemand: 48 }},
+            { id: "hybrid-powertrain-engineer", title: "混动动力总成工程师", titleEn: "Hybrid Powertrain Engineer", category: "研发", employment: 68000, medianPay: 260000, education: "硕士", experience: "3年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 45, demandChange: 20, skillsBefore: ["混动系统设计", "能量管理", "动力匹配", "标定开发"], skillsBeforeEn: ["Hybrid System Design", "Energy Management", "Power Matching", "Calibration Development"], skillsAfter: ["AI能量管理", "智能动力分配", "AI标定优化", "预测性控制"], skillsAfterEn: ["AI Energy Management", "Intelligent Power Distribution", "AI Calibration Optimization", "Predictive Control"], trendData: [100, 112, 122, 130, 138], transformationAdvice: "学习AI能量管理算法、智能动力控制、预测性控制技术。", transformationAdviceEn: "Learn AI energy management algorithms, intelligent power control, and predictive control technology.", relatedJobs: ["AI动力系统专家", "智能能量管理工程师", "预测性控制工程师"], relatedJobsEn: ["AI Powertrain Expert", "Intelligent Energy Management Engineer", "Predictive Control Engineer"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 68, salaryAdjustment: 62, supplyDemand: 42 }},
+            { id: "ice-engineer", title: "传统发动机工程师", titleEn: "ICE Engineer", category: "研发", employment: 110000, medianPay: 210000, education: "本科", experience: "3年+", aiExposure: 6.5, aiRiskIndex: 65, affectedWorkRatio: 65, demandChange: -20, skillsBefore: ["发动机设计", "燃烧分析", "性能标定", "故障诊断"], skillsBeforeEn: ["Engine Design", "Combustion Analysis", "Performance Calibration", "Fault Diagnosis"], skillsAfter: ["AI燃烧优化", "智能诊断", "性能预测", "AI标定"], skillsAfterEn: ["AI Combustion Optimization", "Intelligent Diagnosis", "Performance Prediction", "AI Calibration"], trendData: [100, 88, 75, 62, 50], transformationAdvice: "加速转型到新能源领域，学习AI诊断和智能优化技术。", transformationAdviceEn: "Accelerate transition to new energy, learn AI diagnostics and intelligent optimization.", relatedJobs: ["AI发动机专家", "新能源系统工程师", "智能诊断工程师"], relatedJobsEn: ["AI Engine Expert", "New Energy System Engineer", "Intelligent Diagnosis Engineer"], metrics: { techRisk: 68, workflowChange: 55, skillEvolution: 70, salaryAdjustment: 50, supplyDemand: 70 }},
+            { id: "transmission-engineer", title: "变速箱工程师", titleEn: "Transmission Engineer", category: "研发", employment: 78000, medianPay: 220000, education: "本科", experience: "3年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 58, demandChange: -15, skillsBefore: ["变速箱设计", "传动系统", "换挡控制", "耐久性测试"], skillsBeforeEn: ["Transmission Design", "Drivetrain Systems", "Shift Control", "Durability Testing"], skillsAfter: ["AI传动优化", "智能换挡控制", "预测性维护", "AI测试"], skillsAfterEn: ["AI Drivetrain Optimization", "Intelligent Shift Control", "Predictive Maintenance", "AI Testing"], trendData: [100, 92, 82, 72, 62], transformationAdvice: "学习智能传动控制、AI测试技术，向新能源传动转型。", transformationAdviceEn: "Learn intelligent drivetrain control, AI testing technology, transition to new energy drivetrain.", relatedJobs: ["AI传动专家", "新能源传动工程师", "智能变速箱工程师"], relatedJobsEn: ["AI Drivetrain Expert", "New Energy Drivetrain Engineer", "Intelligent Transmission Engineer"], metrics: { techRisk: 62, workflowChange: 52, skillEvolution: 68, salaryAdjustment: 52, supplyDemand: 68 }},
+            { id: "product-planning-engineer", title: "产品规划工程师", titleEn: "Product Planning Engineer", category: "研发", employment: 55000, medianPay: 320000, education: "本科", experience: "5年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 40, demandChange: 18, skillsBefore: ["市场分析", "产品定位", "竞品分析", "规划制定"], skillsBeforeEn: ["Market Analysis", "Product Positioning", "Competitor Analysis", "Planning Development"], skillsAfter: ["AI市场洞察", "智能产品规划", "AI竞品分析", "数据驱动规划"], skillsAfterEn: ["AI Market Insights", "Intelligent Product Planning", "AI Competitor Analysis", "Data-driven Planning"], trendData: [100, 108, 118, 128, 140], transformationAdvice: "学习AI数据分析、市场预测模型、智能规划系统。", transformationAdviceEn: "Learn AI data analysis, market forecasting models, and intelligent planning systems.", relatedJobs: ["AI产品规划师", "智能战略分析师", "数据驱动规划专家"], relatedJobsEn: ["AI Product Planner", "Intelligent Strategy Analyst", "Data-driven Planning Expert"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 70, salaryAdjustment: 65, supplyDemand: 45 }},
+            { id: "tech-research-engineer", title: "技术预研工程师", titleEn: "Technology Research Engineer", category: "研发", employment: 38000, medianPay: 250000, education: "硕士", experience: "5年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 35, demandChange: 22, skillsBefore: ["前沿技术研究", "技术评估", "可行性分析", "趋势洞察"], skillsBeforeEn: ["Frontier Tech Research", "Technology Assessment", "Feasibility Analysis", "Trend Insights"], skillsAfter: ["AI技术研究", "智能技术评估", "AI趋势分析", "跨学科研究"], skillsAfterEn: ["AI Tech Research", "Intelligent Tech Assessment", "AI Trend Analysis", "Interdisciplinary Research"], trendData: [100, 115, 130, 148, 168], transformationAdvice: "深入学习AI研究方法、大模型应用、跨学科融合技术。", transformationAdviceEn: "Deepen knowledge of AI research methods, LLM applications, and interdisciplinary integration.", relatedJobs: ["AI研究员", "智能技术专家", "前沿技术科学家"], relatedJobsEn: ["AI Researcher", "Intelligent Tech Expert", "Frontier Tech Scientist"], metrics: { techRisk: 40, workflowChange: 48, skillEvolution: 72, salaryAdjustment: 68, supplyDemand: 38 }},
+            { id: "rd-test-engineer", title: "研发测试/验证工程师", titleEn: "R&D Test/Validation Engineer", category: "研发", employment: 110000, medianPay: 210000, education: "本科", experience: "2年+", aiExposure: 7.0, aiRiskIndex: 70, affectedWorkRatio: 68, demandChange: 5, skillsBefore: ["测试用例设计", "测试执行", "缺陷跟踪", "报告编写"], skillsBeforeEn: ["Test Case Design", "Test Execution", "Defect Tracking", "Report Writing"], skillsAfter: ["AI测试自动化", "智能测试用例生成", "AI缺陷预测", "自动化报告"], skillsAfterEn: ["AI Test Automation", "Intelligent Test Case Generation", "AI Defect Prediction", "Automated Reports"], trendData: [100, 103, 105, 108, 110], transformationAdvice: "学习AI测试自动化、智能缺陷预测、测试生成式AI工具。", transformationAdviceEn: "Learn AI test automation, intelligent defect prediction, and generative AI testing tools.", relatedJobs: ["AI测试工程师", "自动化测试专家", "AI质量保障工程师"], relatedJobsEn: ["AI Test Engineer", "Automation Testing Expert", "AI QA Engineer"], metrics: { techRisk: 72, workflowChange: 65, skillEvolution: 75, salaryAdjustment: 55, supplyDemand: 60 }},
+            { id: "rd-assistant-engineer", title: "研发助理工程师", titleEn: "R&D Assistant Engineer", category: "研发", employment: 95000, medianPay: 140000, education: "本科", experience: "1年+", aiExposure: 6.5, aiRiskIndex: 65, affectedWorkRatio: 62, demandChange: 0, skillsBefore: ["文档整理", "数据收集", "图纸绘制", "会议记录"], skillsBeforeEn: ["Document Organization", "Data Collection", "Drawing", "Meeting Notes"], skillsAfter: ["AI文档处理", "智能数据整理", "AI辅助设计", "智能助手"], skillsAfterEn: ["AI Document Processing", "Intelligent Data Organization", "AI-assisted Design", "Intelligent Assistant"], trendData: [100, 100, 100, 100, 100], transformationAdvice: "学习AI工具使用、提升专业技能、转型高价值岗位。", transformationAdviceEn: "Learn AI tools, enhance professional skills, transition to high-value positions.", relatedJobs: ["AI研发助理", "智能文档工程师", "研发数据分析师"], relatedJobsEn: ["AI R&D Assistant", "Intelligent Document Engineer", "R&D Data Analyst"], metrics: { techRisk: 68, workflowChange: 60, skillEvolution: 70, salaryAdjustment: 50, supplyDemand: 62 }},
+            { id: "vehicle-project-director", title: "整车项目总监", titleEn: "Vehicle Project Director", category: "项目管理", employment: 15000, medianPay: 400000, education: "硕士", experience: "15年+", aiExposure: 2.8, aiRiskIndex: 28, affectedWorkRatio: 22, demandChange: 18, skillsBefore: ["战略规划", "资源协调", "风险管理", "团队领导"], skillsBeforeEn: ["Strategic Planning", "Resource Coordination", "Risk Management", "Team Leadership"], skillsAfter: ["AI项目管理", "智能资源优化", "AI风险预测", "数据驱动决策"], skillsAfterEn: ["AI Project Management", "Intelligent Resource Optimization", "AI Risk Prediction", "Data-driven Decision Making"], trendData: [100, 108, 118, 128, 140], transformationAdvice: "学习AI项目管理工具、数据分析、智能化决策方法。", transformationAdviceEn: "Learn AI project management tools, data analysis, and intelligent decision-making methods.", relatedJobs: ["AI项目总监", "数字化转型总监", "智能运营总监"], relatedJobsEn: ["AI Project Director", "Digital Transformation Director", "Intelligent Operations Director"], metrics: { techRisk: 22, workflowChange: 32, skillEvolution: 48, salaryAdjustment: 58, supplyDemand: 42 }},
+            { id: "senior-project-manager", title: "高级项目经理", titleEn: "Senior Project Manager", category: "项目管理", employment: 35000, medianPay: 330000, education: "本科", experience: "8年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 38, demandChange: 20, skillsBefore: ["项目管理", "进度控制", "成本管理", "质量保证"], skillsBeforeEn: ["Project Management", "Schedule Control", "Cost Management", "Quality Assurance"], skillsAfter: ["AI项目管理", "智能进度预测", "AI成本优化", "智能风险分析"], skillsAfterEn: ["AI Project Management", "Intelligent Schedule Prediction", "AI Cost Optimization", "Intelligent Risk Analysis"], trendData: [100, 112, 122, 132, 145], transformationAdvice: "学习AI项目管理平台、智能风险预测、数据驱动决策。", transformationAdviceEn: "Learn AI project management platforms, intelligent risk prediction, and data-driven decision making.", relatedJobs: ["AI项目经理", "智能项目专家", "敏捷AI教练"], relatedJobsEn: ["AI Project Manager", "Intelligent Project Expert", "Agile AI Coach"], metrics: { techRisk: 40, workflowChange: 48, skillEvolution: 65, salaryAdjustment: 62, supplyDemand: 40 }},
+            { id: "project-manager-rd", title: "项目经理(研发/零部件)", titleEn: "Project Manager (R&D/Parts)", category: "项目管理", employment: 55000, medianPay: 220000, education: "本科", experience: "5年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 45, demandChange: 15, skillsBefore: ["项目计划", "跨部门协调", "进度跟踪", "问题解决"], skillsBeforeEn: ["Project Planning", "Cross-functional Coordination", "Progress Tracking", "Problem Solving"], skillsAfter: ["AI项目协调", "智能进度管理", "AI问题预测", "自动化报告"], skillsAfterEn: ["AI Project Coordination", "Intelligent Progress Management", "AI Issue Prediction", "Automated Reporting"], trendData: [100, 108, 115, 122, 130], transformationAdvice: "学习AI协作工具、智能项目管理、数据分析方法。", transformationAdviceEn: "Learn AI collaboration tools, intelligent project management, and data analysis methods.", relatedJobs: ["AI项目经理", "智能协调专家", "数据驱动项目经理"], relatedJobsEn: ["AI Project Manager", "Intelligent Coordination Expert", "Data-driven PM"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 62, salaryAdjustment: 58, supplyDemand: 48 }},
+            { id: "tech-project-manager", title: "技术项目经理", titleEn: "Technical Project Manager", category: "项目管理", employment: 32000, medianPay: 260000, education: "本科", experience: "6年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 40, demandChange: 18, skillsBefore: ["技术规划", "团队管理", "技术评审", "质量控制"], skillsBeforeEn: ["Technical Planning", "Team Management", "Technical Review", "Quality Control"], skillsAfter: ["AI技术管理", "智能评审辅助", "AI质量预测", "技术AI分析"], skillsAfterEn: ["AI Technical Management", "Intelligent Review Assistance", "AI Quality Prediction", "Technical AI Analysis"], trendData: [100, 110, 120, 130, 142], transformationAdvice: "学习AI技术评估、智能质量控制、数据分析能力。", transformationAdviceEn: "Learn AI technical assessment, intelligent quality control, and data analysis capabilities.", relatedJobs: ["AI技术经理", "智能质量专家", "技术AI分析师"], relatedJobsEn: ["AI Technical Manager", "Intelligent Quality Expert", "Technical AI Analyst"], metrics: { techRisk: 42, workflowChange: 48, skillEvolution: 65, salaryAdjustment: 62, supplyDemand: 45 }},
+            { id: "parts-project-manager", title: "零部件项目经理", titleEn: "Parts Project Manager", category: "项目管理", employment: 48000, medianPay: 200000, education: "本科", experience: "5年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 45, demandChange: 12, skillsBefore: ["供应商管理", "零部件开发", "进度控制", "质量协调"], skillsBeforeEn: ["Supplier Management", "Parts Development", "Schedule Control", "Quality Coordination"], skillsAfter: ["AI供应商管理", "智能采购预测", "AI质量分析", "自动化协调"], skillsAfterEn: ["AI Supplier Management", "Intelligent Procurement Prediction", "AI Quality Analysis", "Automated Coordination"], trendData: [100, 106, 112, 118, 125], transformationAdvice: "学习AI供应商管理、智能采购系统、供应链AI技术。", transformationAdviceEn: "Learn AI supplier management, intelligent procurement systems, and supply chain AI technology.", relatedJobs: ["AI采购经理", "智能供应链专家", "供应商AI分析师"], relatedJobsEn: ["AI Procurement Manager", "Intelligent Supply Chain Expert", "Supplier AI Analyst"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 62, salaryAdjustment: 55, supplyDemand: 52 }},
+            { id: "overseas-project-manager", title: "出海/海外项目经理", titleEn: "Overseas Project Manager", category: "项目管理", employment: 18000, medianPay: 450000, education: "本科", experience: "8年+", aiExposure: 4.0, aiRiskIndex: 40, affectedWorkRatio: 32, demandChange: 25, skillsBefore: ["跨文化沟通", "海外法规", "本地化协调", "国际合规"], skillsBeforeEn: ["Cross-cultural Communication", "Overseas Regulations", "Localization Coordination", "International Compliance"], skillsAfter: ["AI跨语言沟通", "智能本地化", "AI合规分析", "全球化协作"], skillsAfterEn: ["AI Cross-language Communication", "Intelligent Localization", "AI Compliance Analysis", "Global Collaboration"], trendData: [100, 118, 138, 160, 185], transformationAdvice: "学习AI翻译工具、跨文化AI协作、全球化智能管理系统。", transformationAdviceEn: "Learn AI translation tools, cross-cultural AI collaboration, and global intelligent management systems.", relatedJobs: ["AI全球化经理", "智能本地化专家", "国际AI合规分析师"], relatedJobsEn: ["AI Globalization Manager", "Intelligent Localization Expert", "International AI Compliance Analyst"], metrics: { techRisk: 35, workflowChange: 45, skillEvolution: 58, salaryAdjustment: 68, supplyDemand: 35 }},
+            { id: "project-assistant", title: "项目助理/专员", titleEn: "Project Assistant/Specialist", category: "项目管理", employment: 78000, medianPay: 110000, education: "本科", experience: "1年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 58, demandChange: -5, skillsBefore: ["文档管理", "会议组织", "数据录入", "进度跟踪"], skillsBeforeEn: ["Document Management", "Meeting Organization", "Data Entry", "Progress Tracking"], skillsAfter: ["AI文档处理", "智能会议助手", "AI数据分析", "自动化协调"], skillsAfterEn: ["AI Document Processing", "Intelligent Meeting Assistant", "AI Data Analysis", "Automated Coordination"], trendData: [100, 98, 95, 92, 88], transformationAdvice: "提升专业技能，学习AI工具，向高级项目管理岗位转型。", transformationAdviceEn: "Enhance professional skills, learn AI tools, transition to senior project management positions.", relatedJobs: ["AI项目协调员", "智能助理", "数据分析专员"], relatedJobsEn: ["AI Project Coordinator", "Intelligent Assistant", "Data Analysis Specialist"], metrics: { techRisk: 62, workflowChange: 58, skillEvolution: 65, salaryAdjustment: 48, supplyDemand: 65 }},
+            { id: "pmo-manager", title: "PMO经理", titleEn: "PMO Manager", category: "项目管理", employment: 25000, medianPay: 250000, education: "本科", experience: "8年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: 15, skillsBefore: ["项目管理流程", "方法论制定", "工具推广", "培训指导"], skillsBeforeEn: ["PM Processes", "Methodology Development", "Tool Promotion", "Training Guidance"], skillsAfter: ["AI项目管理平台", "智能流程优化", "AI绩效分析", "智能培训"], skillsAfterEn: ["AI Project Management Platform", "Intelligent Process Optimization", "AI Performance Analysis", "Intelligent Training"], trendData: [100, 108, 118, 128, 140], transformationAdvice: "学习AI项目管理平台、智能流程优化、数据分析方法。", transformationAdviceEn: "Learn AI project management platforms, intelligent process optimization, and data analysis methods.", relatedJobs: ["AI PMO经理", "智能流程专家", "项目管理AI分析师"], relatedJobsEn: ["AI PMO Manager", "Intelligent Process Expert", "PM AI Analyst"], metrics: { techRisk: 48, workflowChange: 52, skillEvolution: 65, salaryAdjustment: 60, supplyDemand: 48 }},
+            { id: "assembly-engineer", title: "总装工程师", titleEn: "Assembly Engineer", category: "工程技术", employment: 78000, medianPay: 220000, education: "本科", experience: "3年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 48, demandChange: 5, skillsBefore: ["装配工艺", "工艺设计", "现场管理", "质量控制"], skillsBeforeEn: ["Assembly Process", "Process Design", "Site Management", "Quality Control"], skillsAfter: ["AI工艺优化", "智能装配指导", "AI质量预测", "自动化装配"], skillsAfterEn: ["AI Process Optimization", "Intelligent Assembly Guidance", "AI Quality Prediction", "Automated Assembly"], trendData: [100, 103, 105, 108, 112], transformationAdvice: "学习AI工艺优化、智能装配系统、自动化技术。", transformationAdviceEn: "Learn AI process optimization, intelligent assembly systems, and automation technology.", relatedJobs: ["AI工艺工程师", "智能装配专家", "自动化工程师"], relatedJobsEn: ["AI Process Engineer", "Intelligent Assembly Expert", "Automation Engineer"], metrics: { techRisk: 48, workflowChange: 52, skillEvolution: 65, salaryAdjustment: 55, supplyDemand: 55 }},
+            { id: "welding-engineer", title: "焊装工程师", titleEn: "Welding Engineer", category: "工程技术", employment: 68000, medianPay: 210000, education: "本科", experience: "3年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 45, demandChange: 0, skillsBefore: ["焊接工艺", "设备调试", "工艺参数", "质量控制"], skillsBeforeEn: ["Welding Process", "Equipment Debugging", "Process Parameters", "Quality Control"], skillsAfter: ["AI焊接优化", "智能参数调整", "AI质量检测", "自动化焊接"], skillsAfterEn: ["AI Welding Optimization", "Intelligent Parameter Adjustment", "AI Quality Inspection", "Automated Welding"], trendData: [100, 100, 100, 100, 100], transformationAdvice: "学习AI焊接技术、智能质量检测、自动化设备管理。", transformationAdviceEn: "Learn AI welding technology, intelligent quality inspection, and automated equipment management.", relatedJobs: ["AI焊接工程师", "智能焊接专家", "自动化焊接工程师"], relatedJobsEn: ["AI Welding Engineer", "Intelligent Welding Expert", "Automated Welding Engineer"], metrics: { techRisk: 42, workflowChange: 48, skillEvolution: 62, salaryAdjustment: 52, supplyDemand: 58 }},
+            { id: "paint-engineer", title: "涂装工程师", titleEn: "Paint Engineer", category: "工程技术", employment: 62000, medianPay: 200000, education: "本科", experience: "3年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 45, demandChange: 0, skillsBefore: ["涂装工艺", "涂料选择", "颜色管理", "环保合规"], skillsBeforeEn: ["Paint Process", "Paint Selection", "Color Management", "Environmental Compliance"], skillsAfter: ["AI涂装优化", "智能颜色匹配", "AI环保监控", "自动化涂装"], skillsAfterEn: ["AI Paint Optimization", "Intelligent Color Matching", "AI Environmental Monitoring", "Automated Painting"], trendData: [100, 100, 100, 100, 100], transformationAdvice: "学习AI涂料技术、智能颜色系统、环保AI监测。", transformationAdviceEn: "Learn AI painting technology, intelligent color systems, and environmental AI monitoring.", relatedJobs: ["AI涂装工程师", "智能颜色专家", "环保AI工程师"], relatedJobsEn: ["AI Paint Engineer", "Intelligent Color Expert", "Environmental AI Engineer"], metrics: { techRisk: 42, workflowChange: 48, skillEvolution: 62, salaryAdjustment: 52, supplyDemand: 58 }},
+            { id: "stamping-engineer", title: "冲压工程师", titleEn: "Stamping Engineer", category: "工程技术", employment: 55000, medianPay: 200000, education: "本科", experience: "3年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 45, demandChange: -2, skillsBefore: ["冲压工艺", "模具设计", "材料应用", "成形分析"], skillsBeforeEn: ["Stamping Process", "Die Design", "Material Application", "Forming Analysis"], skillsAfter: ["AI冲压优化", "智能模具设计", "AI成形预测", "自动化冲压"], skillsAfterEn: ["AI Stamping Optimization", "Intelligent Die Design", "AI Forming Prediction", "Automated Stamping"], trendData: [100, 98, 96, 95, 95], transformationAdvice: "学习AI冲压技术、智能模具设计、自动化技术。", transformationAdviceEn: "Learn AI stamping technology, intelligent die design, and automation technology.", relatedJobs: ["AI冲压工程师", "智能模具专家", "自动化冲压工程师"], relatedJobsEn: ["AI Stamping Engineer", "Intelligent Die Expert", "Automated Stamping Engineer"], metrics: { techRisk: 42, workflowChange: 48, skillEvolution: 62, salaryAdjustment: 50, supplyDemand: 60 }},
+            { id: "qa-qc-engineer", title: "质量工程师(QA/QC)", titleEn: "Quality Engineer (QA/QC)", category: "工程技术", employment: 95000, medianPay: 170000, education: "本科", experience: "3年+", aiExposure: 6.5, aiRiskIndex: 65, affectedWorkRatio: 62, demandChange: 10, skillsBefore: ["质量体系", "检验标准", "数据分析", "问题解决"], skillsBeforeEn: ["Quality System", "Inspection Standards", "Data Analysis", "Problem Solving"], skillsAfter: ["AI质量检测", "智能缺陷识别", "AI质量预测", "自动化报告"], skillsAfterEn: ["AI Quality Inspection", "Intelligent Defect Recognition", "AI Quality Prediction", "Automated Reporting"], trendData: [100, 105, 110, 115, 122], transformationAdvice: "学习AI视觉检测、智能缺陷识别、质量数据分析。", transformationAdviceEn: "Learn AI visual inspection, intelligent defect recognition, and quality data analysis.", relatedJobs: ["AI质量工程师", "智能检测专家", "质量AI分析师"], relatedJobsEn: ["AI Quality Engineer", "Intelligent Inspection Expert", "Quality AI Analyst"], metrics: { techRisk: 65, workflowChange: 60, skillEvolution: 72, salaryAdjustment: 55, supplyDemand: 52 }},
+            { id: "sqe-engineer", title: "SQE供应商质量", titleEn: "SQE Supplier Quality Engineer", category: "工程技术", employment: 78000, medianPay: 190000, education: "本科", experience: "3年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 55, demandChange: 8, skillsBefore: ["供应商审核", "来料检验", "质量改进", "供应商管理"], skillsBeforeEn: ["Supplier Audit", "Incoming Inspection", "Quality Improvement", "Supplier Management"], skillsAfter: ["AI供应商评估", "智能来料检测", "AI质量预测", "智能供应商管理"], skillsAfterEn: ["AI Supplier Evaluation", "Intelligent Incoming Inspection", "AI Quality Prediction", "Intelligent Supplier Management"], trendData: [100, 104, 108, 112, 118], transformationAdvice: "学习AI供应商管理、智能检测技术、数据分析能力。", transformationAdviceEn: "Learn AI supplier management, intelligent inspection technology, and data analysis capabilities.", relatedJobs: ["AI供应商质量专家", "智能采购分析师", "供应链AI工程师"], relatedJobsEn: ["AI Supplier Quality Expert", "Intelligent Procurement Analyst", "Supply Chain AI Engineer"], metrics: { techRisk: 60, workflowChange: 55, skillEvolution: 70, salaryAdjustment: 55, supplyDemand: 55 }},
+            { id: "cqe-engineer", title: "CQE客户质量", titleEn: "CQE Customer Quality Engineer", category: "工程技术", employment: 62000, medianPay: 180000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 50, demandChange: 10, skillsBefore: ["客户投诉处理", "质量分析", "改进措施", "客户沟通"], skillsBeforeEn: ["Customer Complaint Handling", "Quality Analysis", "Improvement Measures", "Customer Communication"], skillsAfter: ["AI客户分析", "智能投诉处理", "AI情感分析", "预测性质量改进"], skillsAfterEn: ["AI Customer Analysis", "Intelligent Complaint Handling", "AI Sentiment Analysis", "Predictive Quality Improvement"], trendData: [100, 105, 110, 115, 122], transformationAdvice: "学习AI客户分析、情感分析、预测性质量改进。", transformationAdviceEn: "Learn AI customer analysis, sentiment analysis, and predictive quality improvement.", relatedJobs: ["AI客户质量专家", "智能客服分析师", "质量AI改进专家"], relatedJobsEn: ["AI Customer Quality Expert", "Intelligent Customer Analyst", "Quality AI Improvement Expert"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 68, salaryAdjustment: 58, supplyDemand: 52 }},
+            { id: "process-engineer", title: "工艺工程师", titleEn: "Process Engineer", category: "生产制造", employment: 140000, medianPay: 180000, education: "本科", experience: "3年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 58, demandChange: 5, skillsBefore: ["工艺设计", "现场改善", "参数优化", "标准制定"], skillsBeforeEn: ["Process Design", "Site Improvement", "Parameter Optimization", "Standard Setting"], skillsAfter: ["AI工艺优化", "智能参数调整", "AI现场诊断", "数字孪生"], skillsAfterEn: ["AI Process Optimization", "Intelligent Parameter Adjustment", "AI Site Diagnosis", "Digital Twin"], trendData: [100, 103, 105, 108, 112], transformationAdvice: "学习AI工艺优化、数字孪生、智能制造技术。", transformationAdviceEn: "Learn AI process optimization, digital twin, and smart manufacturing technology.", relatedJobs: ["AI工艺工程师", "智能制造工程师", "数字孪生专家"], relatedJobsEn: ["AI Process Engineer", "Smart Manufacturing Engineer", "Digital Twin Expert"], metrics: { techRisk: 58, workflowChange: 55, skillEvolution: 70, salaryAdjustment: 55, supplyDemand: 55 }},
+            { id: "equipment-engineer", title: "设备工程师", titleEn: "Equipment Engineer", category: "生产制造", employment: 125000, medianPay: 170000, education: "本科", experience: "3年+", aiExposure: 6.5, aiRiskIndex: 65, affectedWorkRatio: 62, demandChange: 5, skillsBefore: ["设备维护", "故障诊断", "备件管理", "改造升级"], skillsBeforeEn: ["Equipment Maintenance", "Fault Diagnosis", "Spare Parts Management", "Upgrading"], skillsAfter: ["AI设备监控", "预测性维护", "智能故障诊断", "AI备件管理"], skillsAfterEn: ["AI Equipment Monitoring", "Predictive Maintenance", "Intelligent Fault Diagnosis", "AI Spare Parts Management"], trendData: [100, 103, 105, 108, 112], transformationAdvice: "学习AI预测性维护、智能监控、数字孪生技术。", transformationAdviceEn: "Learn AI predictive maintenance, intelligent monitoring, and digital twin technology.", relatedJobs: ["AI设备专家", "预测性维护工程师", "智能制造工程师"], relatedJobsEn: ["AI Equipment Expert", "Predictive Maintenance Engineer", "Smart Manufacturing Engineer"], metrics: { techRisk: 65, workflowChange: 58, skillEvolution: 70, salaryAdjustment: 52, supplyDemand: 55 }},
+            { id: "mold-engineer", title: "模具工程师", titleEn: "Mold Engineer", category: "生产制造", employment: 110000, medianPay: 190000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 52, demandChange: 0, skillsBefore: ["模具设计", "加工工艺", "调试优化", "寿命管理"], skillsBeforeEn: ["Mold Design", "Machining Process", "Debugging Optimization", "Life Management"], skillsAfter: ["AI模具设计", "智能加工优化", "AI寿命预测", "3D打印模具"], skillsAfterEn: ["AI Mold Design", "Intelligent Machining Optimization", "AI Life Prediction", "3D Printed Molds"], trendData: [100, 100, 100, 100, 100], transformationAdvice: "学习AI模具设计、智能加工、增材制造技术。", transformationAdviceEn: "Learn AI mold design, intelligent machining, and additive manufacturing technology.", relatedJobs: ["AI模具工程师", "智能加工专家", "增材制造工程师"], relatedJobsEn: ["AI Mold Engineer", "Intelligent Machining Expert", "Additive Manufacturing Engineer"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 68, salaryAdjustment: 55, supplyDemand: 58 }},
+            { id: "ie-engineer", title: "IE工程师", titleEn: "IE Engineer", category: "生产制造", employment: 95000, medianPay: 200000, education: "本科", experience: "3年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 55, demandChange: 10, skillsBefore: ["效率分析", "流程优化", "工时测定", "布局规划"], skillsBeforeEn: ["Efficiency Analysis", "Process Optimization", "Time Measurement", "Layout Planning"], skillsAfter: ["AI效率分析", "智能流程优化", "AI工时预测", "数字工厂规划"], skillsAfterEn: ["AI Efficiency Analysis", "Intelligent Process Optimization", "AI Time Prediction", "Digital Factory Planning"], trendData: [100, 105, 110, 115, 122], transformationAdvice: "学习AI数据分析、数字工厂、智能制造技术。", transformationAdviceEn: "Learn AI data analysis, digital factory, and smart manufacturing technology.", relatedJobs: ["AI IE工程师", "智能工厂规划师", "数字孪生专家"], relatedJobsEn: ["AI IE Engineer", "Smart Factory Planner", "Digital Twin Expert"], metrics: { techRisk: 58, workflowChange: 55, skillEvolution: 70, salaryAdjustment: 58, supplyDemand: 52 }},
+            { id: "logistics-engineer", title: "物流工程师", titleEn: "Logistics Engineer", category: "供应链采购", employment: 88000, medianPay: 170000, education: "本科", experience: "3年+", aiExposure: 6.5, aiRiskIndex: 65, affectedWorkRatio: 60, demandChange: 15, skillsBefore: ["物流规划", "路线优化", "仓储管理", "成本控制"], skillsBeforeEn: ["Logistics Planning", "Route Optimization", "Warehouse Management", "Cost Control"], skillsAfter: ["AI物流优化", "智能路线规划", "AI仓储管理", "无人搬运"], skillsAfterEn: ["AI Logistics Optimization", "Intelligent Route Planning", "AI Warehouse Management", "Automated Handling"], trendData: [100, 108, 118, 128, 140], transformationAdvice: "学习AI物流优化、智能仓储、无人搬运技术。", transformationAdviceEn: "Learn AI logistics optimization, intelligent warehousing, and automated handling technology.", relatedJobs: ["AI物流工程师", "智能仓储专家", "无人搬运系统工程师"], relatedJobsEn: ["AI Logistics Engineer", "Intelligent Warehouse Expert", "Automated Handling Engineer"], metrics: { techRisk: 65, workflowChange: 60, skillEvolution: 70, salaryAdjustment: 55, supplyDemand: 48 }},
+            { id: "line-operator", title: "一线操作工", titleEn: "Production Line Operator", category: "生产制造", employment: 1580000, medianPay: 80000, education: "高中", experience: "1年+", aiExposure: 8.5, aiRiskIndex: 85, affectedWorkRatio: 85, demandChange: -40, skillsBefore: ["简单操作", "重复性作业", "体力劳动", "基本技能"], skillsBeforeEn: ["Simple Operations", "Repetitive Work", "Physical Labor", "Basic Skills"], skillsAfter: ["人机协作", "智能设备操作", "质量检测", "异常处理"], skillsAfterEn: ["Human-Machine Collaboration", "Smart Equipment Operation", "Quality Inspection", "Exception Handling"], trendData: [100, 78, 58, 42, 30], transformationAdvice: "学习智能设备操作技能，向人机协作岗位转型。", transformationAdviceEn: "Learn smart equipment operation skills, transition to human-machine collaboration roles.", relatedJobs: ["智能设备操作员", "人机协作工", "质检操作员"], relatedJobsEn: ["Smart Equipment Operator", "Human-Machine Collaborator", "Quality Control Operator"], metrics: { techRisk: 88, workflowChange: 75, skillEvolution: 60, salaryAdjustment: 35, supplyDemand: 85 }},
+            { id: "skilled-operator", title: "技能操作工", titleEn: "Skilled Operator", category: "生产制造", employment: 1100000, medianPay: 100000, education: "中专", experience: "2年+", aiExposure: 8.0, aiRiskIndex: 80, affectedWorkRatio: 78, demandChange: -30, skillsBefore: ["专业技能", "设备操作", "质量控制", "问题处理"], skillsBeforeEn: ["Professional Skills", "Equipment Operation", "Quality Control", "Problem Handling"], skillsAfter: ["智能设备维护", "AI辅助作业", "数据监控", "高级技能"], skillsAfterEn: ["Smart Equipment Maintenance", "AI-assisted Operations", "Data Monitoring", "Advanced Skills"], trendData: [100, 82, 65, 52, 42], transformationAdvice: "提升技能水平，学习智能设备操作和数据分析。", transformationAdviceEn: "Enhance skill levels, learn smart equipment operation and data analysis.", relatedJobs: ["智能设备工程师", "高级操作员", "数据监控员"], relatedJobsEn: ["Smart Equipment Engineer", "Senior Operator", "Data Monitor"], metrics: { techRisk: 82, workflowChange: 70, skillEvolution: 62, salaryAdjustment: 40, supplyDemand: 80 }},
+            { id: "team-leader", title: "班组长", titleEn: "Team Leader", category: "生产制造", employment: 250000, medianPay: 120000, education: "中专", experience: "3年+", aiExposure: 7.0, aiRiskIndex: 70, affectedWorkRatio: 65, demandChange: -15, skillsBefore: ["现场管理", "人员调配", "任务分配", "简单汇报"], skillsBeforeEn: ["Site Management", "Staff Allocation", "Task Distribution", "Simple Reporting"], skillsAfter: ["AI现场管理", "智能排班", "AI绩效分析", "数据驱动管理"], skillsAfterEn: ["AI Site Management", "Intelligent Scheduling", "AI Performance Analysis", "Data-driven Management"], trendData: [100, 92, 82, 75, 70], transformationAdvice: "学习AI管理系统、数据分析、智能排班技术。", transformationAdviceEn: "Learn AI management systems, data analysis, and intelligent scheduling technology.", relatedJobs: ["AI班组长", "智能生产协调员", "数据驱动管理者"], relatedJobsEn: ["AI Team Leader", "Smart Production Coordinator", "Data-driven Manager"], metrics: { techRisk: 72, workflowChange: 65, skillEvolution: 65, salaryAdjustment: 45, supplyDemand: 72 }},
+            { id: "production-supervisor", title: "生产主管", titleEn: "Production Supervisor", category: "生产制造", employment: 155000, medianPay: 160000, education: "大专", experience: "5年+", aiExposure: 6.5, aiRiskIndex: 65, affectedWorkRatio: 60, demandChange: -8, skillsBefore: ["生产计划", "人员管理", "质量控制", "效率提升"], skillsBeforeEn: ["Production Planning", "Staff Management", "Quality Control", "Efficiency Improvement"], skillsAfter: ["AI生产计划", "智能排产", "AI质量管理", "数据驱动决策"], skillsAfterEn: ["AI Production Planning", "Intelligent Scheduling", "AI Quality Management", "Data-driven Decision Making"], trendData: [100, 95, 90, 88, 88], transformationAdvice: "学习AI生产管理系统、智能排产、数据分析方法。", transformationAdviceEn: "Learn AI production management systems, intelligent scheduling, and data analysis methods.", relatedJobs: ["AI生产主管", "智能工厂经理", "数据驱动生产专家"], relatedJobsEn: ["AI Production Supervisor", "Smart Factory Manager", "Data-driven Production Expert"], metrics: { techRisk: 65, workflowChange: 60, skillEvolution: 65, salaryAdjustment: 50, supplyDemand: 68 }},
+            { id: "production-manager", title: "生产经理", titleEn: "Production Manager", category: "生产制造", employment: 78000, medianPay: 280000, education: "本科", experience: "10年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 5, skillsBefore: ["生产管理", "成本控制", "团队建设", "战略规划"], skillsBeforeEn: ["Production Management", "Cost Control", "Team Building", "Strategic Planning"], skillsAfter: ["AI生产管理", "智能决策", "数字化运营", "AI成本优化"], skillsAfterEn: ["AI Production Management", "Intelligent Decision Making", "Digital Operations", "AI Cost Optimization"], trendData: [100, 103, 105, 108, 112], transformationAdvice: "学习AI管理系统、智能决策、数字化转型技术。", transformationAdviceEn: "Learn AI management systems, intelligent decision making, and digital transformation technology.", relatedJobs: ["AI生产经理", "智能工厂总监", "数字化运营专家"], relatedJobsEn: ["AI Production Manager", "Smart Factory Director", "Digital Operations Expert"], metrics: { techRisk: 52, workflowChange: 55, skillEvolution: 65, salaryAdjustment: 60, supplyDemand: 55 }},
+            { id: "production-planner", title: "生产计划专员", titleEn: "Production Planner", category: "生产制造", employment: 110000, medianPay: 130000, education: "大专", experience: "2年+", aiExposure: 7.0, aiRiskIndex: 70, affectedWorkRatio: 68, demandChange: -10, skillsBefore: ["生产排程", "物料计划", "数据统计", "进度跟踪"], skillsBeforeEn: ["Production Scheduling", "Material Planning", "Data Statistics", "Progress Tracking"], skillsAfter: ["AI智能排产", "需求预测", "AI物料计划", "自动报表"], skillsAfterEn: ["AI Intelligent Scheduling", "Demand Forecasting", "AI Material Planning", "Automated Reporting"], trendData: [100, 95, 88, 82, 78], transformationAdvice: "学习AI排产系统、需求预测、数据分析能力。", transformationAdviceEn: "Learn AI scheduling systems, demand forecasting, and data analysis capabilities.", relatedJobs: ["AI排产工程师", "需求预测分析师", "供应链AI专员"], relatedJobsEn: ["AI Scheduling Engineer", "Demand Forecasting Analyst", "Supply Chain AI Specialist"], metrics: { techRisk: 72, workflowChange: 65, skillEvolution: 70, salaryAdjustment: 48, supplyDemand: 70 }},
+            { id: "supply-chain-manager", title: "供应链经理", titleEn: "Supply Chain Manager", category: "供应链采购", employment: 55000, medianPay: 280000, education: "本科", experience: "8年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 18, skillsBefore: ["供应链规划", "供应商管理", "库存控制", "风险管理"], skillsBeforeEn: ["Supply Chain Planning", "Supplier Management", "Inventory Control", "Risk Management"], skillsAfter: ["AI供应链优化", "智能采购预测", "AI库存管理", "风险AI分析"], skillsAfterEn: ["AI Supply Chain Optimization", "Intelligent Procurement Prediction", "AI Inventory Management", "AI Risk Analysis"], trendData: [100, 110, 120, 132, 148], transformationAdvice: "学习AI供应链系统、智能采购、数据分析技术。", transformationAdviceEn: "Learn AI supply chain systems, intelligent procurement, and data analysis technology.", relatedJobs: ["AI供应链经理", "智能采购专家", "供应链AI分析师"], relatedJobsEn: ["AI Supply Chain Manager", "Intelligent Procurement Expert", "Supply Chain AI Analyst"], metrics: { techRisk: 52, workflowChange: 55, skillEvolution: 68, salaryAdjustment: 62, supplyDemand: 45 }},
+            { id: "procurement-manager", title: "采购经理", titleEn: "Procurement Manager", category: "供应链采购", employment: 68000, medianPay: 250000, education: "本科", experience: "6年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 55, demandChange: 10, skillsBefore: ["采购策略", "供应商谈判", "成本分析", "合同管理"], skillsBeforeEn: ["Procurement Strategy", "Supplier Negotiation", "Cost Analysis", "Contract Management"], skillsAfter: ["AI采购优化", "智能供应商匹配", "AI成本分析", "智能合同管理"], skillsAfterEn: ["AI Procurement Optimization", "Intelligent Supplier Matching", "AI Cost Analysis", "Intelligent Contract Management"], trendData: [100, 106, 112, 118, 128], transformationAdvice: "学习AI采购系统、智能谈判、数据分析能力。", transformationAdviceEn: "Learn AI procurement systems, intelligent negotiation, and data analysis capabilities.", relatedJobs: ["AI采购经理", "智能供应商管理专家", "采购AI分析师"], relatedJobsEn: ["AI Procurement Manager", "Intelligent Supplier Management Expert", "Procurement AI Analyst"], metrics: { techRisk: 58, workflowChange: 55, skillEvolution: 68, salaryAdjustment: 58, supplyDemand: 52 }},
+            { id: "strategic-procurement-engineer", title: "战略采购工程师", titleEn: "Strategic Procurement Engineer", category: "供应链采购", employment: 38000, medianPay: 220000, education: "本科", experience: "5年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 15, skillsBefore: ["战略采购", "成本优化", "供应商开发", "市场分析"], skillsBeforeEn: ["Strategic Procurement", "Cost Optimization", "Supplier Development", "Market Analysis"], skillsAfter: ["AI战略采购", "智能成本优化", "AI供应商分析", "市场AI预测"], skillsAfterEn: ["AI Strategic Procurement", "Intelligent Cost Optimization", "AI Supplier Analysis", "Market AI Prediction"], trendData: [100, 108, 118, 128, 142], transformationAdvice: "学习AI采购分析、智能成本优化、市场预测技术。", transformationAdviceEn: "Learn AI procurement analysis, intelligent cost optimization, and market forecasting technology.", relatedJobs: ["AI战略采购专家", "智能成本分析师", "采购AI策略师"], relatedJobsEn: ["AI Strategic Procurement Expert", "Intelligent Cost Analyst", "Procurement AI Strategist"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 68, salaryAdjustment: 60, supplyDemand: 48 }},
+            { id: "procurement-assistant", title: "采购专员/助理", titleEn: "Procurement Assistant", category: "供应链采购", employment: 125000, medianPay: 90000, education: "大专", experience: "1年+", aiExposure: 7.5, aiRiskIndex: 75, affectedWorkRatio: 72, demandChange: -15, skillsBefore: ["订单处理", "文档管理", "数据录入", "供应商沟通"], skillsBeforeEn: ["Order Processing", "Document Management", "Data Entry", "Supplier Communication"], skillsAfter: ["AI订单处理", "智能文档识别", "AI数据处理", "自动化流程"], skillsAfterEn: ["AI Order Processing", "Intelligent Document Recognition", "AI Data Processing", "Automated Processes"], trendData: [100, 92, 82, 75, 68], transformationAdvice: "提升专业能力，学习AI工具，向战略性采购岗位转型。", transformationAdviceEn: "Enhance professional capabilities, learn AI tools, transition to strategic procurement positions.", relatedJobs: ["AI采购专员", "智能采购分析师", "采购流程自动化工程师"], relatedJobsEn: ["AI Procurement Assistant", "Intelligent Procurement Analyst", "Procurement Automation Engineer"], metrics: { techRisk: 78, workflowChange: 68, skillEvolution: 68, salaryAdjustment: 42, supplyDemand: 75 }},
+            { id: "logistics-manager", title: "物流经理", titleEn: "Logistics Manager", category: "供应链采购", employment: 48000, medianPay: 240000, education: "本科", experience: "6年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 50, demandChange: 15, skillsBefore: ["物流管理", "仓储优化", "运输调度", "成本控制"], skillsBeforeEn: ["Logistics Management", "Warehouse Optimization", "Transport Scheduling", "Cost Control"], skillsAfter: ["AI物流管理", "智能仓储系统", "AI运输优化", "无人配送"], skillsAfterEn: ["AI Logistics Management", "Intelligent Warehouse Systems", "AI Transport Optimization", "Autonomous Delivery"], trendData: [100, 108, 118, 130, 145], transformationAdvice: "学习AI物流系统、智能仓储、无人配送技术。", transformationAdviceEn: "Learn AI logistics systems, intelligent warehousing, and autonomous delivery technology.", relatedJobs: ["AI物流经理", "智能仓储专家", "无人配送系统工程师"], relatedJobsEn: ["AI Logistics Manager", "Intelligent Warehouse Expert", "Autonomous Delivery Engineer"], metrics: { techRisk: 52, workflowChange: 55, skillEvolution: 68, salaryAdjustment: 60, supplyDemand: 48 }},
+            { id: "warehouse-supervisor", title: "仓储主管", titleEn: "Warehouse Supervisor", category: "供应链采购", employment: 95000, medianPay: 130000, education: "大专", experience: "3年+", aiExposure: 7.0, aiRiskIndex: 70, affectedWorkRatio: 68, demandChange: -10, skillsBefore: ["仓储管理", "人员调度", "库存控制", "出入库管理"], skillsBeforeEn: ["Warehouse Management", "Staff Scheduling", "Inventory Control", "Inbound/Outbound Management"], skillsAfter: ["AI仓储管理", "智能库存监控", "AI拣货系统", "无人仓库"], skillsAfterEn: ["AI Warehouse Management", "Intelligent Inventory Monitoring", "AI Picking System", "Unmanned Warehouse"], trendData: [100, 95, 88, 82, 78], transformationAdvice: "学习AI仓储系统、智能库存管理、无人仓技术。", transformationAdviceEn: "Learn AI warehouse systems, intelligent inventory management, and unmanned warehouse technology.", relatedJobs: ["AI仓储主管", "智能仓库工程师", "无人仓运营专家"], relatedJobsEn: ["AI Warehouse Supervisor", "Smart Warehouse Engineer", "Unmanned Warehouse Operations Expert"], metrics: { techRisk: 72, workflowChange: 65, skillEvolution: 68, salaryAdjustment: 45, supplyDemand: 70 }},
+            { id: "marketing-director", title: "市场总监", titleEn: "Marketing Director", category: "营销销售", employment: 15000, medianPay: 450000, education: "本科", experience: "12年+", aiExposure: 2.2, aiRiskIndex: 22, affectedWorkRatio: 18, demandChange: 20, skillsBefore: ["品牌战略", "市场洞察", "团队管理", "资源整合"], skillsBeforeEn: ["Brand Strategy", "Market Insights", "Team Management", "Resource Integration"], skillsAfter: ["AI品牌战略", "智能市场洞察", "AI营销决策", "数据驱动增长"], skillsAfterEn: ["AI Brand Strategy", "Intelligent Market Insights", "AI Marketing Decisions", "Data-driven Growth"], trendData: [100, 112, 125, 140, 160], transformationAdvice: "学习AI营销工具、数据分析、智能决策系统。", transformationAdviceEn: "Learn AI marketing tools, data analysis, and intelligent decision systems.", relatedJobs: ["AI营销总监", "首席增长官", "数字化营销专家"], relatedJobsEn: ["AI Marketing Director", "Chief Growth Officer", "Digital Marketing Expert"], metrics: { techRisk: 18, workflowChange: 30, skillEvolution: 45, salaryAdjustment: 62, supplyDemand: 38 }},
+            { id: "marketing-manager", title: "市场经理", titleEn: "Marketing Manager", category: "营销销售", employment: 38000, medianPay: 280000, education: "本科", experience: "6年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: 18, skillsBefore: ["市场策划", "活动执行", "数据分析", "媒体投放"], skillsBeforeEn: ["Marketing Planning", "Event Execution", "Data Analysis", "Media Placement"], skillsAfter: ["AI营销策划", "智能投放优化", "AI内容生成", "精准营销"], skillsAfterEn: ["AI Marketing Planning", "Intelligent Placement Optimization", "AI Content Generation", "Precision Marketing"], trendData: [100, 110, 122, 138, 158], transformationAdvice: "学习AI营销工具、内容生成、精准营销技术。", transformationAdviceEn: "Learn AI marketing tools, content generation, and precision marketing technology.", relatedJobs: ["AI市场经理", "智能营销专家", "数据驱动营销分析师"], relatedJobsEn: ["AI Marketing Manager", "Intelligent Marketing Expert", "Data-driven Marketing Analyst"], metrics: { techRisk: 48, workflowChange: 52, skillEvolution: 68, salaryAdjustment: 65, supplyDemand: 42 }},
+            { id: "pr-manager", title: "公关经理", titleEn: "PR Manager", category: "营销销售", employment: 25000, medianPay: 240000, education: "本科", experience: "5年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 45, demandChange: 12, skillsBefore: ["公关策划", "媒体关系", "危机处理", "内容撰写"], skillsBeforeEn: ["PR Planning", "Media Relations", "Crisis Management", "Content Writing"], skillsAfter: ["AI舆情分析", "智能公关策划", "AI危机预警", "AI内容创作"], skillsAfterEn: ["AI Public Opinion Analysis", "Intelligent PR Planning", "AI Crisis Warning", "AI Content Creation"], trendData: [100, 106, 112, 118, 128], transformationAdvice: "学习AI舆情监测、危机预警、内容生成技术。", transformationAdviceEn: "Learn AI public opinion monitoring, crisis warning, and content generation technology.", relatedJobs: ["AI公关专家", "智能舆情分析师", "AI危机管理专家"], relatedJobsEn: ["AI PR Expert", "Intelligent Sentiment Analyst", "AI Crisis Management Expert"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 65, salaryAdjustment: 60, supplyDemand: 52 }},
+            { id: "sales-director", title: "销售总监", titleEn: "Sales Director", category: "营销销售", employment: 18000, medianPay: 500000, education: "本科", experience: "12年+", aiExposure: 2.5, aiRiskIndex: 25, affectedWorkRatio: 20, demandChange: 15, skillsBefore: ["销售战略", "团队建设", "客户管理", "商务谈判"], skillsBeforeEn: ["Sales Strategy", "Team Building", "Customer Management", "Business Negotiation"], skillsAfter: ["AI销售战略", "智能客户分析", "AI销售预测", "数字化销售"], skillsAfterEn: ["AI Sales Strategy", "Intelligent Customer Analysis", "AI Sales Forecasting", "Digital Sales"], trendData: [100, 108, 118, 130, 145], transformationAdvice: "学习AI销售工具、智能CRM、数据分析方法。", transformationAdviceEn: "Learn AI sales tools, intelligent CRM, and data analysis methods.", relatedJobs: ["AI销售总监", "智能销售专家", "数字化销售总监"], relatedJobsEn: ["AI Sales Director", "Intelligent Sales Expert", "Digital Sales Director"], metrics: { techRisk: 20, workflowChange: 30, skillEvolution: 48, salaryAdjustment: 65, supplyDemand: 42 }},
+            { id: "sales-manager", title: "销售经理", titleEn: "Sales Manager", category: "营销销售", employment: 62000, medianPay: 250000, education: "本科", experience: "5年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: 12, skillsBefore: ["客户开发", "销售谈判", "业绩管理", "渠道建设"], skillsBeforeEn: ["Customer Development", "Sales Negotiation", "Performance Management", "Channel Building"], skillsAfter: ["AI客户分析", "智能销售助手", "AI业绩预测", "智能渠道管理"], skillsAfterEn: ["AI Customer Analysis", "Intelligent Sales Assistant", "AI Performance Prediction", "Intelligent Channel Management"], trendData: [100, 106, 112, 120, 130], transformationAdvice: "学习AI销售工具、智能CRM、数据驱动销售方法。", transformationAdviceEn: "Learn AI sales tools, intelligent CRM, and data-driven sales methods.", relatedJobs: ["AI销售经理", "智能销售专家", "数据驱动销售分析师"], relatedJobsEn: ["AI Sales Manager", "Intelligent Sales Expert", "Data-driven Sales Analyst"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 65, salaryAdjustment: 62, supplyDemand: 50 }},
+            { id: "4s-general-manager", title: "4S店总经理", titleEn: "4S Store General Manager", category: "营销销售", employment: 25000, medianPay: 350000, education: "本科", experience: "10年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: -5, skillsBefore: ["店面管理", "团队建设", "客户服务", "业务运营"], skillsBeforeEn: ["Store Management", "Team Building", "Customer Service", "Business Operations"], skillsAfter: ["AI店面管理", "智能客户体验", "AI运营优化", "数字化转型"], skillsAfterEn: ["AI Store Management", "Intelligent Customer Experience", "AI Operations Optimization", "Digital Transformation"], trendData: [100, 98, 95, 92, 90], transformationAdvice: "学习AI门店管理、智能客户体验、数字化运营技术。", transformationAdviceEn: "Learn AI store management, intelligent customer experience, and digital operations technology.", relatedJobs: ["AI门店总经理", "智能体验专家", "数字化门店运营专家"], relatedJobsEn: ["AI Store GM", "Intelligent Experience Expert", "Digital Store Operations Expert"], metrics: { techRisk: 48, workflowChange: 52, skillEvolution: 65, salaryAdjustment: 58, supplyDemand: 58 }},
+            { id: "sales-consultant", title: "销售顾问", titleEn: "Sales Consultant", category: "营销销售", employment: 480000, medianPay: 120000, education: "大专", experience: "1年+", aiExposure: 7.5, aiRiskIndex: 75, affectedWorkRatio: 72, demandChange: -20, skillsBefore: ["产品介绍", "客户接待", "试驾安排", "合同谈判"], skillsBeforeEn: ["Product Introduction", "Customer Reception", "Test Drive Arrangement", "Contract Negotiation"], skillsAfter: ["AI产品顾问", "智能客户分析", "AI配置推荐", "虚拟展厅"], skillsAfterEn: ["AI Product Consultant", "Intelligent Customer Analysis", "AI Configuration Recommendation", "Virtual Showroom"], trendData: [100, 90, 78, 68, 58], transformationAdvice: "学习AI销售助手、虚拟展厅技术、提升专业咨询能力。", transformationAdviceEn: "Learn AI sales assistants, virtual showroom technology, enhance professional consulting capabilities.", relatedJobs: ["AI销售顾问", "智能体验专家", "虚拟展厅顾问"], relatedJobsEn: ["AI Sales Consultant", "Intelligent Experience Expert", "Virtual Showroom Consultant"], metrics: { techRisk: 78, workflowChange: 68, skillEvolution: 65, salaryAdjustment: 40, supplyDemand: 78 }},
+            { id: "channel-manager", title: "渠道经理", titleEn: "Channel Manager", category: "营销销售", employment: 38000, medianPay: 220000, education: "本科", experience: "5年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 10, skillsBefore: ["渠道开发", "经销商管理", "政策制定", "业绩考核"], skillsBeforeEn: ["Channel Development", "Dealer Management", "Policy Setting", "Performance Assessment"], skillsAfter: ["AI渠道分析", "智能经销商管理", "AI政策优化", "数据驱动管理"], skillsAfterEn: ["AI Channel Analysis", "Intelligent Dealer Management", "AI Policy Optimization", "Data-driven Management"], trendData: [100, 106, 112, 118, 128], transformationAdvice: "学习AI渠道分析、智能经销商管理、数据分析方法。", transformationAdviceEn: "Learn AI channel analysis, intelligent dealer management, and data analysis methods.", relatedJobs: ["AI渠道经理", "智能经销商管理专家", "渠道AI分析师"], relatedJobsEn: ["AI Channel Manager", "Intelligent Dealer Management Expert", "Channel AI Analyst"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 65, salaryAdjustment: 58, supplyDemand: 52 }},
+            { id: "overseas-sales", title: "海外销售", titleEn: "Overseas Sales", category: "营销销售", employment: 32000, medianPay: 280000, education: "本科", experience: "3年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 38, demandChange: 25, skillsBefore: ["海外市场开拓", "跨文化沟通", "国际商务", "语言能力"], skillsBeforeEn: ["Overseas Market Development", "Cross-cultural Communication", "International Business", "Language Skills"], skillsAfter: ["AI海外市场分析", "智能翻译", "AI商务谈判", "全球化AI工具"], skillsAfterEn: ["AI Overseas Market Analysis", "Intelligent Translation", "AI Business Negotiation", "Global AI Tools"], trendData: [100, 118, 138, 162, 190], transformationAdvice: "学习AI海外市场分析、跨文化AI工具、国际商务智能化。", transformationAdviceEn: "Learn AI overseas market analysis, cross-cultural AI tools, and international business intelligence.", relatedJobs: ["AI海外销售经理", "智能全球化专家", "跨境AI商务分析师"], relatedJobsEn: ["AI Overseas Sales Manager", "Intelligent Globalization Expert", "Cross-border AI Business Analyst"], metrics: { techRisk: 40, workflowChange: 48, skillEvolution: 62, salaryAdjustment: 65, supplyDemand: 35 }},
+            { id: "after-sales-director", title: "售后总监", titleEn: "After-Sales Director", category: "售后技术", employment: 12000, medianPay: 380000, education: "本科", experience: "12年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 38, demandChange: 10, skillsBefore: ["售后战略", "服务网络", "团队管理", "客户满意度"], skillsBeforeEn: ["After-Sales Strategy", "Service Network", "Team Management", "Customer Satisfaction"], skillsAfter: ["AI售后服务", "智能服务网络", "AI客户分析", "预测性服务"], skillsAfterEn: ["AI After-Sales Service", "Intelligent Service Network", "AI Customer Analysis", "Predictive Service"], trendData: [100, 105, 110, 118, 128], transformationAdvice: "学习AI售后服务系统、智能服务网络、预测性维护技术。", transformationAdviceEn: "Learn AI after-sales service systems, intelligent service networks, and predictive maintenance technology.", relatedJobs: ["AI售后总监", "智能服务总监", "预测性服务专家"], relatedJobsEn: ["AI After-Sales Director", "Intelligent Service Director", "Predictive Service Expert"], metrics: { techRisk: 40, workflowChange: 48, skillEvolution: 62, salaryAdjustment: 62, supplyDemand: 50 }},
+            { id: "after-sales-support", title: "售后技术支持", titleEn: "After-Sales Technical Support", category: "售后技术", employment: 55000, medianPay: 180000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 8, skillsBefore: ["故障诊断", "技术支持", "远程服务", "问题解决"], skillsBeforeEn: ["Fault Diagnosis", "Technical Support", "Remote Service", "Problem Solving"], skillsAfter: ["AI远程诊断", "智能故障预测", "AI技术支持", "AR远程指导"], skillsAfterEn: ["AI Remote Diagnosis", "Intelligent Fault Prediction", "AI Technical Support", "AR Remote Guidance"], trendData: [100, 104, 108, 112, 118], transformationAdvice: "学习AI远程诊断、AR辅助维修、智能故障预测技术。", transformationAdviceEn: "Learn AI remote diagnosis, AR-assisted repair, and intelligent fault prediction technology.", relatedJobs: ["AI技术支持工程师", "智能诊断专家", "AR维修工程师"], relatedJobsEn: ["AI Technical Support Engineer", "Intelligent Diagnosis Expert", "AR Maintenance Engineer"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 68, salaryAdjustment: 58, supplyDemand: 52 }},
+            { id: "repair-technician", title: "维修技师", titleEn: "Repair Technician", category: "售后技术", employment: 380000, medianPay: 100000, education: "中专", experience: "3年+", aiExposure: 7.0, aiRiskIndex: 70, affectedWorkRatio: 65, demandChange: -15, skillsBefore: ["故障维修", "部件更换", "诊断技能", "实操经验"], skillsBeforeEn: ["Fault Repair", "Parts Replacement", "Diagnostic Skills", "Hands-on Experience"], skillsAfter: ["AI辅助诊断", "智能维修助手", "AR维修指导", "新能源维修"], skillsAfterEn: ["AI-assisted Diagnosis", "Intelligent Repair Assistant", "AR Repair Guidance", "New Energy Repair"], trendData: [100, 92, 82, 75, 68], transformationAdvice: "学习AI诊断工具、AR维修技术、向新能源维修转型。", transformationAdviceEn: "Learn AI diagnostic tools, AR repair technology, transition to new energy repair.", relatedJobs: ["AI维修技师", "AR维修工程师", "新能源维修专家"], relatedJobsEn: ["AI Repair Technician", "AR Maintenance Engineer", "New Energy Repair Expert"], metrics: { techRisk: 72, workflowChange: 62, skillEvolution: 68, salaryAdjustment: 45, supplyDemand: 72 }},
+            { id: "service-consultant", title: "服务顾问", titleEn: "Service Consultant", category: "售后技术", employment: 185000, medianPay: 90000, education: "大专", experience: "1年+", aiExposure: 7.0, aiRiskIndex: 70, affectedWorkRatio: 68, demandChange: -20, skillsBefore: ["客户接待", "故障记录", "报价沟通", "进度跟踪"], skillsBeforeEn: ["Customer Reception", "Fault Recording", "Quote Communication", "Progress Tracking"], skillsAfter: ["AI客户接待", "智能故障分析", "AI报价系统", "自动化流程"], skillsAfterEn: ["AI Customer Reception", "Intelligent Fault Analysis", "AI Quotation System", "Automated Processes"], trendData: [100, 90, 78, 68, 58], transformationAdvice: "学习AI客服系统、智能诊断、数字化服务流程。", transformationAdviceEn: "Learn AI customer service systems, intelligent diagnostics, and digital service processes.", relatedJobs: ["AI服务顾问", "智能客服专家", "数字化服务顾问"], relatedJobsEn: ["AI Service Consultant", "Intelligent Customer Service Expert", "Digital Service Consultant"], metrics: { techRisk: 72, workflowChange: 65, skillEvolution: 65, salaryAdjustment: 40, supplyDemand: 75 }},
+            { id: "parts-manager", title: "备件经理", titleEn: "Parts Manager", category: "售后技术", employment: 38000, medianPay: 170000, education: "本科", experience: "5年+", aiExposure: 6.5, aiRiskIndex: 65, affectedWorkRatio: 60, demandChange: 0, skillsBefore: ["备件管理", "库存控制", "采购计划", "成本管理"], skillsBeforeEn: ["Parts Management", "Inventory Control", "Procurement Planning", "Cost Management"], skillsAfter: ["AI备件管理", "智能库存预测", "AI采购优化", "智能物流"], skillsAfterEn: ["AI Parts Management", "Intelligent Inventory Prediction", "AI Procurement Optimization", "Intelligent Logistics"], trendData: [100, 100, 100, 100, 100], transformationAdvice: "学习AI备件管理、智能库存预测、供应链AI技术。", transformationAdviceEn: "Learn AI parts management, intelligent inventory prediction, and supply chain AI technology.", relatedJobs: ["AI备件经理", "智能库存专家", "供应链AI分析师"], relatedJobsEn: ["AI Parts Manager", "Intelligent Inventory Expert", "Supply Chain AI Analyst"], metrics: { techRisk: 65, workflowChange: 58, skillEvolution: 68, salaryAdjustment: 52, supplyDemand: 60 }},
+            { id: "hr-director", title: "HR总监", titleEn: "HR Director", category: "职能管理", employment: 15000, medianPay: 400000, education: "本科", experience: "12年+", aiExposure: 2.8, aiRiskIndex: 28, affectedWorkRatio: 22, demandChange: 15, skillsBefore: ["人力资源战略", "组织发展", "人才规划", "文化建设"], skillsBeforeEn: ["HR Strategy", "Organizational Development", "Talent Planning", "Culture Building"], skillsAfter: ["AI人力资源战略", "智能人才分析", "AI招聘优化", "AI绩效管理"], skillsAfterEn: ["AI HR Strategy", "Intelligent Talent Analysis", "AI Recruitment Optimization", "AI Performance Management"], trendData: [100, 108, 118, 130, 145], transformationAdvice: "学习AI HR系统、智能人才分析、数据驱动人力资源管理。", transformationAdviceEn: "Learn AI HR systems, intelligent talent analysis, and data-driven HR management.", relatedJobs: ["AI HR总监", "智能人力资源专家", "数字化HR总监"], relatedJobsEn: ["AI HR Director", "Intelligent HR Expert", "Digital HR Director"], metrics: { techRisk: 22, workflowChange: 35, skillEvolution: 52, salaryAdjustment: 62, supplyDemand: 45 }},
+            { id: "hr-manager", title: "HR经理", titleEn: "HR Manager", category: "职能管理", employment: 48000, medianPay: 220000, education: "本科", experience: "6年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 10, skillsBefore: ["招聘配置", "培训发展", "绩效管理", "员工关系"], skillsBeforeEn: ["Recruitment", "Training Development", "Performance Management", "Employee Relations"], skillsAfter: ["AI智能招聘", "个性化培训", "AI绩效分析", "AI员工分析"], skillsAfterEn: ["AI Intelligent Recruitment", "Personalized Training", "AI Performance Analysis", "AI Employee Analysis"], trendData: [100, 105, 110, 118, 128], transformationAdvice: "学习AI招聘工具、个性化培训系统、HR数据分析。", transformationAdviceEn: "Learn AI recruitment tools, personalized training systems, and HR data analysis.", relatedJobs: ["AI HR经理", "智能招聘专家", "HR数据分析师"], relatedJobsEn: ["AI HR Manager", "Intelligent Recruitment Expert", "HR Data Analyst"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 65, salaryAdjustment: 58, supplyDemand: 52 }},
+            { id: "finance-director", title: "财务总监", titleEn: "Finance Director", category: "职能管理", employment: 12000, medianPay: 450000, education: "本科", experience: "15年+", aiExposure: 2.5, aiRiskIndex: 25, affectedWorkRatio: 18, demandChange: 12, skillsBefore: ["财务管理", "风险控制", "资本运营", "战略规划"], skillsBeforeEn: ["Financial Management", "Risk Control", "Capital Operations", "Strategic Planning"], skillsAfter: ["AI财务管理", "智能风控", "AI资金管理", "智能财务分析"], skillsAfterEn: ["AI Financial Management", "Intelligent Risk Control", "AI Capital Management", "Intelligent Financial Analysis"], trendData: [100, 106, 112, 120, 130], transformationAdvice: "学习AI财务系统、智能风控、数据分析技术。", transformationAdviceEn: "Learn AI financial systems, intelligent risk control, and data analysis technology.", relatedJobs: ["AI财务总监", "智能财务专家", "数字化CFO"], relatedJobsEn: ["AI Finance Director", "Intelligent Finance Expert", "Digital CFO"], metrics: { techRisk: 20, workflowChange: 32, skillEvolution: 50, salaryAdjustment: 65, supplyDemand: 48 }},
+            { id: "finance-manager", title: "财务经理", titleEn: "Finance Manager", category: "职能管理", employment: 38000, medianPay: 250000, education: "本科", experience: "6年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 5, skillsBefore: ["财务核算", "报表编制", "税务筹划", "预算管理"], skillsBeforeEn: ["Financial Accounting", "Report Preparation", "Tax Planning", "Budget Management"], skillsAfter: ["AI财务核算", "智能报表", "AI税务分析", "智能预算"], skillsAfterEn: ["AI Financial Accounting", "Intelligent Reporting", "AI Tax Analysis", "Intelligent Budgeting"], trendData: [100, 103, 105, 108, 112], transformationAdvice: "学习AI财务工具、智能报表系统、财务数据分析。", transformationAdviceEn: "Learn AI financial tools, intelligent reporting systems, and financial data analysis.", relatedJobs: ["AI财务经理", "智能财务分析师", "财务AI专家"], relatedJobsEn: ["AI Finance Manager", "Intelligent Finance Analyst", "Finance AI Expert"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 65, salaryAdjustment: 58, supplyDemand: 55 }},
+            { id: "accountant", title: "会计专员", titleEn: "Accountant", category: "职能管理", employment: 140000, medianPay: 110000, education: "本科", experience: "2年+", aiExposure: 7.5, aiRiskIndex: 75, affectedWorkRatio: 72, demandChange: -25, skillsBefore: ["凭证录入", "账务处理", "税务申报", "报表编制"], skillsBeforeEn: ["Voucher Entry", "Accounting Processing", "Tax Filing", "Report Preparation"], skillsAfter: ["AI自动记账", "智能税务", "AI报表生成", "自动化对账"], skillsAfterEn: ["AI Automatic Accounting", "Intelligent Tax", "AI Report Generation", "Automated Reconciliation"], trendData: [100, 85, 70, 58, 48], transformationAdvice: "学习AI财务工具、财务数据分析、向战略财务转型。", transformationAdviceEn: "Learn AI financial tools, financial data analysis, transition to strategic finance.", relatedJobs: ["AI会计专员", "财务数据分析师", "战略财务专家"], relatedJobsEn: ["AI Accountant", "Financial Data Analyst", "Strategic Finance Expert"], metrics: { techRisk: 78, workflowChange: 68, skillEvolution: 68, salaryAdjustment: 42, supplyDemand: 78 }},
+            { id: "legal-manager", title: "法务经理", titleEn: "Legal Manager", category: "职能管理", employment: 25000, medianPay: 260000, education: "本科", experience: "6年+", aiExposure: 2.2, aiRiskIndex: 22, affectedWorkRatio: 15, demandChange: 18, skillsBefore: ["合同审核", "法律咨询", "风险控制", "合规管理"], skillsBeforeEn: ["Contract Review", "Legal Consultation", "Risk Control", "Compliance Management"], skillsAfter: ["AI合同审查", "智能法律检索", "AI合规分析", "智能风险预警"], skillsAfterEn: ["AI Contract Review", "Intelligent Legal Retrieval", "AI Compliance Analysis", "Intelligent Risk Warning"], trendData: [100, 110, 122, 138, 158], transformationAdvice: "学习AI法律工具、智能合规系统、提升法律专业深度。", transformationAdviceEn: "Learn AI legal tools, intelligent compliance systems, deepen legal expertise.", relatedJobs: ["AI法务专家", "智能合规分析师", "法律AI专家"], relatedJobsEn: ["AI Legal Expert", "Intelligent Compliance Analyst", "Legal AI Expert"], metrics: { techRisk: 18, workflowChange: 30, skillEvolution: 50, salaryAdjustment: 62, supplyDemand: 40 }},
+            { id: "admin-staff", title: "行政专员", titleEn: "Administrative Staff", category: "职能管理", employment: 155000, medianPay: 80000, education: "大专", experience: "1年+", aiExposure: 7.5, aiRiskIndex: 75, affectedWorkRatio: 72, demandChange: -25, skillsBefore: ["日程安排", "文件处理", "会议组织", "后勤支持"], skillsBeforeEn: ["Schedule Arrangement", "Document Processing", "Meeting Organization", "Logistics Support"], skillsAfter: ["AI智能助理", "智能日程管理", "AI文档处理", "自动化行政"], skillsAfterEn: ["AI Intelligent Assistant", "Intelligent Schedule Management", "AI Document Processing", "Automated Administration"], trendData: [100, 85, 70, 58, 48], transformationAdvice: "提升专业能力，学习AI办公工具，向管理岗位转型。", transformationAdviceEn: "Enhance professional capabilities, learn AI office tools, transition to management positions.", relatedJobs: ["AI行政专员", "智能办公专家", "行政AI分析师"], relatedJobsEn: ["AI Administrative Staff", "Intelligent Office Expert", "Admin AI Analyst"], metrics: { techRisk: 78, workflowChange: 68, skillEvolution: 65, salaryAdjustment: 40, supplyDemand: 78 }},
+            { id: "it-engineer", title: "IT工程师", titleEn: "IT Engineer", category: "职能管理", employment: 78000, medianPay: 200000, education: "本科", experience: "3年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: 15, skillsBefore: ["系统运维", "网络管理", "安全管理", "技术支持"], skillsBeforeEn: ["System Operations", "Network Management", "Security Management", "Technical Support"], skillsAfter: ["AI系统运维", "智能监控", "AI安全分析", "云原生技术"], skillsAfterEn: ["AI System Operations", "Intelligent Monitoring", "AI Security Analysis", "Cloud Native Technology"], trendData: [100, 108, 118, 130, 145], transformationAdvice: "学习AI运维工具、智能安全、云原生技术。", transformationAdviceEn: "Learn AI operations tools, intelligent security, and cloud native technology.", relatedJobs: ["AI运维工程师", "智能安全专家", "云原生工程师"], relatedJobsEn: ["AI Operations Engineer", "Intelligent Security Expert", "Cloud Native Engineer"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 68, salaryAdjustment: 60, supplyDemand: 45 }},
+            { id: "parts-rd-engineer", title: "零部件研发工程师", titleEn: "Parts R&D Engineer", category: "零部件配套", employment: 95000, medianPay: 220000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 10, skillsBefore: ["零部件设计", "材料选用", "工艺规划", "验证测试"], skillsBeforeEn: ["Parts Design", "Material Selection", "Process Planning", "Validation Testing"], skillsAfter: ["AI零部件设计", "智能材料选择", "AI工艺优化", "智能验证"], skillsAfterEn: ["AI Parts Design", "Intelligent Material Selection", "AI Process Optimization", "Intelligent Validation"], trendData: [100, 105, 110, 115, 122], transformationAdvice: "学习AI辅助设计、智能材料工程、验证自动化技术。", transformationAdviceEn: "Learn AI-assisted design, intelligent material engineering, and validation automation technology.", relatedJobs: ["AI零部件工程师", "智能材料专家", "智能验证工程师"], relatedJobsEn: ["AI Parts Engineer", "Smart Material Expert", "Intelligent Validation Engineer"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 68, salaryAdjustment: 58, supplyDemand: 52 }},
+            { id: "parts-senior-rd", title: "零部件高级研发", titleEn: "Senior Parts R&D Engineer", category: "零部件配套", employment: 48000, medianPay: 320000, education: "硕士", experience: "8年+", aiExposure: 4.5, aiRiskIndex: 45, affectedWorkRatio: 38, demandChange: 15, skillsBefore: ["前沿研发", "技术突破", "团队指导", "标准制定"], skillsBeforeEn: ["Frontier R&D", "Tech Breakthroughs", "Team Guidance", "Standard Setting"], skillsAfter: ["AI研发创新", "智能技术突破", "AI团队协作", "AI标准制定"], skillsAfterEn: ["AI R&D Innovation", "Intelligent Tech Breakthroughs", "AI Team Collaboration", "AI Standard Setting"], trendData: [100, 108, 118, 130, 145], transformationAdvice: "学习AI研发工具、智能创新方法、跨学科融合技术。", transformationAdviceEn: "Learn AI R&D tools, intelligent innovation methods, and interdisciplinary integration technology.", relatedJobs: ["AI研发专家", "智能创新工程师", "技术AI分析师"], relatedJobsEn: ["AI R&D Expert", "Intelligent Innovation Engineer", "Technical AI Analyst"], metrics: { techRisk: 40, workflowChange: 48, skillEvolution: 68, salaryAdjustment: 65, supplyDemand: 45 }},
+            { id: "parts-quality-engineer", title: "零部件质量工程师", titleEn: "Parts Quality Engineer", category: "零部件配套", employment: 68000, medianPay: 170000, education: "本科", experience: "3年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 55, demandChange: 5, skillsBefore: ["质量控制", "供应商审核", "问题分析", "改进措施"], skillsBeforeEn: ["Quality Control", "Supplier Audit", "Problem Analysis", "Improvement Measures"], skillsAfter: ["AI质量控制", "智能供应商评估", "AI问题预测", "智能改进"], skillsAfterEn: ["AI Quality Control", "Intelligent Supplier Evaluation", "AI Problem Prediction", "Intelligent Improvement"], trendData: [100, 103, 105, 108, 112], transformationAdvice: "学习AI质量控制、智能检测、数据分析技术。", transformationAdviceEn: "Learn AI quality control, intelligent inspection, and data analysis technology.", relatedJobs: ["AI质量工程师", "智能检测专家", "质量AI分析师"], relatedJobsEn: ["AI Quality Engineer", "Intelligent Inspection Expert", "Quality AI Analyst"], metrics: { techRisk: 58, workflowChange: 55, skillEvolution: 68, salaryAdjustment: 55, supplyDemand: 55 }},
+            { id: "parts-sales-engineer", title: "零部件销售工程师", titleEn: "Parts Sales Engineer", category: "零部件配套", employment: 62000, medianPay: 200000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 8, skillsBefore: ["技术销售", "客户支持", "产品推荐", "商务谈判"], skillsBeforeEn: ["Technical Sales", "Customer Support", "Product Recommendation", "Business Negotiation"], skillsAfter: ["AI技术销售", "智能客户分析", "AI产品推荐", "智能谈判"], skillsAfterEn: ["AI Technical Sales", "Intelligent Customer Analysis", "AI Product Recommendation", "Intelligent Negotiation"], trendData: [100, 104, 108, 112, 118], transformationAdvice: "学习AI销售工具、智能CRM、技术销售智能化。", transformationAdviceEn: "Learn AI sales tools, intelligent CRM, and technical sales intelligence.", relatedJobs: ["AI销售工程师", "智能客户分析师", "技术AI销售专家"], relatedJobsEn: ["AI Sales Engineer", "Intelligent Customer Analyst", "Technical AI Sales Expert"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 65, salaryAdjustment: 58, supplyDemand: 52 }},
+            { id: "parts-application-engineer", title: "零部件应用工程师", titleEn: "Parts Application Engineer", category: "零部件配套", employment: 55000, medianPay: 190000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 10, skillsBefore: ["应用支持", "技术对接", "问题解决", "客户培训"], skillsBeforeEn: ["Application Support", "Technical Docking", "Problem Solving", "Customer Training"], skillsAfter: ["AI应用支持", "智能问题诊断", "AI客户培训", "虚拟技术支持"], skillsAfterEn: ["AI Application Support", "Intelligent Problem Diagnosis", "AI Customer Training", "Virtual Technical Support"], trendData: [100, 105, 110, 115, 122], transformationAdvice: "学习AI技术支持、虚拟培训、智能诊断技术。", transformationAdviceEn: "Learn AI technical support, virtual training, and intelligent diagnosis technology.", relatedJobs: ["AI应用工程师", "智能技术支持专家", "虚拟培训工程师"], relatedJobsEn: ["AI Application Engineer", "Intelligent Technical Support Expert", "Virtual Training Engineer"], metrics: { techRisk: 52, workflowChange: 52, skillEvolution: 65, salaryAdjustment: 58, supplyDemand: 50 }},
+            { id: "user-operation-manager", title: "用户运营经理", titleEn: "User Operations Manager", category: "新势力特色", employment: 38000, medianPay: 240000, education: "本科", experience: "4年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 20, skillsBefore: ["用户增长", "社群运营", "活动策划", "数据分析"], skillsBeforeEn: ["User Growth", "Community Operations", "Activity Planning", "Data Analysis"], skillsAfter: ["AI用户增长", "智能社群运营", "AI活动策划", "AI数据分析"], skillsAfterEn: ["AI User Growth", "Intelligent Community Operations", "AI Activity Planning", "AI Data Analysis"], trendData: [100, 112, 125, 142, 162], transformationAdvice: "学习AI用户运营工具、智能增长策略、数据驱动运营。", transformationAdviceEn: "Learn AI user operations tools, intelligent growth strategies, and data-driven operations.", relatedJobs: ["AI用户运营经理", "智能增长专家", "数据驱动运营分析师"], relatedJobsEn: ["AI User Operations Manager", "Intelligent Growth Expert", "Data-driven Operations Analyst"], metrics: { techRisk: 52, workflowChange: 55, skillEvolution: 70, salaryAdjustment: 65, supplyDemand: 40 }},
+            { id: "data-analyst", title: "数据分析师", titleEn: "Data Analyst", category: "新势力特色", employment: 48000, medianPay: 220000, education: "本科", experience: "2年+", aiExposure: 6.0, aiRiskIndex: 60, affectedWorkRatio: 52, demandChange: 25, skillsBefore: ["数据处理", "统计分析", "报表制作", "业务洞察"], skillsBeforeEn: ["Data Processing", "Statistical Analysis", "Report Making", "Business Insights"], skillsAfter: ["AI数据分析", "机器学习模型", "AI数据可视化", "智能洞察"], skillsAfterEn: ["AI Data Analysis", "Machine Learning Models", "AI Data Visualization", "Intelligent Insights"], trendData: [100, 118, 140, 165, 195], transformationAdvice: "深入学习AI数据分析、机器学习、数据可视化工具。", transformationAdviceEn: "Deepen knowledge of AI data analysis, machine learning, and data visualization tools.", relatedJobs: ["AI数据分析师", "机器学习工程师", "数据AI专家"], relatedJobsEn: ["AI Data Analyst", "Machine Learning Engineer", "Data AI Expert"], metrics: { techRisk: 58, workflowChange: 58, skillEvolution: 78, salaryAdjustment: 68, supplyDemand: 35 }},
+            { id: "charging-network-engineer", title: "充电网络工程师", titleEn: "Charging Network Engineer", category: "新势力特色", employment: 32000, medianPay: 200000, education: "本科", experience: "3年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: 30, skillsBefore: ["充电网络规划", "设施建设", "运营管理", "用户服务"], skillsBeforeEn: ["Charging Network Planning", "Facility Construction", "Operations Management", "User Service"], skillsAfter: ["AI网络规划", "智能运营优化", "AI用户服务", "预测性维护"], skillsAfterEn: ["AI Network Planning", "Intelligent Operations Optimization", "AI User Service", "Predictive Maintenance"], trendData: [100, 122, 150, 185, 225], transformationAdvice: "学习AI网络规划、智能运营、充电AI技术。", transformationAdviceEn: "Learn AI network planning, intelligent operations, and charging AI technology.", relatedJobs: ["AI充电网络工程师", "智能能源专家", "充电AI运营工程师"], relatedJobsEn: ["AI Charging Network Engineer", "Intelligent Energy Expert", "Charging AI Operations Engineer"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 68, salaryAdjustment: 62, supplyDemand: 32 }},
+            { id: "connected-vehicle-ops", title: "车联网运营工程师", titleEn: "Connected Vehicle Operations Engineer", category: "新势力特色", employment: 38000, medianPay: 220000, education: "本科", experience: "3年+", aiExposure: 5.5, aiRiskIndex: 55, affectedWorkRatio: 48, demandChange: 28, skillsBefore: ["车联网服务", "数据监控", "用户运营", "故障处理"], skillsBeforeEn: ["Connected Vehicle Services", "Data Monitoring", "User Operations", "Fault Handling"], skillsAfter: ["AI车联网服务", "智能数据监控", "AI用户运营", "预测性服务"], skillsAfterEn: ["AI Connected Vehicle Services", "Intelligent Data Monitoring", "AI User Operations", "Predictive Service"], trendData: [100, 120, 145, 175, 210], transformationAdvice: "学习AI车联网技术、智能数据监控、服务AI系统。", transformationAdviceEn: "Learn AI connected vehicle technology, intelligent data monitoring, and service AI systems.", relatedJobs: ["AI车联网运营工程师", "智能出行服务专家", "车联网AI分析师"], relatedJobsEn: ["AI Connected Vehicle Operations Engineer", "Intelligent Mobility Service Expert", "Connected Vehicle AI Analyst"], metrics: { techRisk: 52, workflowChange: 55, skillEvolution: 72, salaryAdjustment: 65, supplyDemand: 35 }},
+            { id: "commercial-rd-engineer", title: "商用车研发工程师", titleEn: "Commercial Vehicle R&D Engineer", category: "商用车专项", employment: 55000, medianPay: 230000, education: "本科", experience: "3年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: 12, skillsBefore: ["商用车设计", "功能开发", "性能验证", "成本控制"], skillsBeforeEn: ["Commercial Vehicle Design", "Function Development", "Performance Verification", "Cost Control"], skillsAfter: ["AI商用车设计", "智能功能开发", "AI性能优化", "智能成本控制"], skillsAfterEn: ["AI Commercial Vehicle Design", "Intelligent Function Development", "AI Performance Optimization", "Intelligent Cost Control"], trendData: [100, 106, 112, 118, 125], transformationAdvice: "学习AI商用车技术、智能设计、智能成本优化。", transformationAdviceEn: "Learn AI commercial vehicle technology, intelligent design, and intelligent cost optimization.", relatedJobs: ["AI商用车研发工程师", "智能商用车设计师", "商用车AI优化专家"], relatedJobsEn: ["AI Commercial Vehicle R&D Engineer", "Intelligent Commercial Vehicle Designer", "Commercial Vehicle AI Optimization Expert"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 65, salaryAdjustment: 60, supplyDemand: 50 }},
+            { id: "truck-chassis-engineer", title: "重卡底盘工程师", titleEn: "Heavy Truck Chassis Engineer", category: "商用车专项", employment: 48000, medianPay: 240000, education: "本科", experience: "4年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: 8, skillsBefore: ["重卡底盘设计", "悬架系统", "车架设计", "可靠性验证"], skillsBeforeEn: ["Heavy Truck Chassis Design", "Suspension Systems", "Frame Design", "Reliability Verification"], skillsAfter: ["AI底盘设计", "智能轻量化", "AI可靠性分析", "智能验证"], skillsAfterEn: ["AI Chassis Design", "Intelligent Lightweight", "AI Reliability Analysis", "Intelligent Verification"], trendData: [100, 104, 108, 112, 118], transformationAdvice: "学习AI底盘设计、智能轻量化、可靠性AI分析技术。", transformationAdviceEn: "Learn AI chassis design, intelligent lightweight, and reliability AI analysis technology.", relatedJobs: ["AI重卡底盘工程师", "智能底盘专家", "可靠性AI工程师"], relatedJobsEn: ["AI Heavy Truck Chassis Engineer", "Intelligent Chassis Expert", "Reliability AI Engineer"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 65, salaryAdjustment: 60, supplyDemand: 52 }},
+            { id: "bus-body-engineer", title: "客车车身工程师", titleEn: "Bus Body Engineer", category: "商用车专项", employment: 38000, medianPay: 210000, education: "本科", experience: "3年+", aiExposure: 5.0, aiRiskIndex: 50, affectedWorkRatio: 42, demandChange: 5, skillsBefore: ["客车车身设计", "结构分析", "人机工程", "安全设计"], skillsBeforeEn: ["Bus Body Design", "Structural Analysis", "Ergonomics", "Safety Design"], skillsAfter: ["AI车身设计", "智能结构优化", "AI人机工程", "AI安全设计"], skillsAfterEn: ["AI Body Design", "Intelligent Structural Optimization", "AI Ergonomics", "AI Safety Design"], trendData: [100, 102, 105, 108, 112], transformationAdvice: "学习AI车身设计、智能结构优化、人机AI技术。", transformationAdviceEn: "Learn AI body design, intelligent structural optimization, and ergonomic AI technology.", relatedJobs: ["AI客车车身工程师", "智能车身设计师", "人机AI工程师"], relatedJobsEn: ["AI Bus Body Engineer", "Intelligent Body Designer", "Ergonomic AI Engineer"], metrics: { techRisk: 48, workflowChange: 50, skillEvolution: 65, salaryAdjustment: 58, supplyDemand: 55 }}
+        ];
+
+        let currentLang = 'zh';
+        let currentArea = 'employment';
+        let selectedOccupations = [];
+        let compareList = [];
+
+        function t(key) {
+            return translations[currentLang][key] || key;
+        }
+
+        function getLocalizedTitle(occ) {
+            return currentLang === 'zh' ? occ.title : (occ.titleEn || occ.title);
+        }
+
+        function getLocalizedCategory(category) {
+            return t(category);
+        }
+
+        function getLocalizedSkills(skills, skillsEn) {
+            return currentLang === 'zh' ? skills : skillsEn;
+        }
+
+        function getLocalizedAdvice(occ) {
+            return currentLang === 'zh' ? occ.transformationAdvice : (occ.transformationAdviceEn || occ.transformationAdvice);
+        }
+
+        function getLocalizedRelatedJobs(occ) {
+            return currentLang === 'zh' ? occ.relatedJobs : (occ.relatedJobsEn || occ.relatedJobs);
+        }
+
+        function formatNumber(num) {
+            if (currentLang === 'zh') {
+                if (num >= 10000) return (num / 10000).toFixed(1) + '万';
+                return num.toLocaleString();
+            } else {
+                return num.toLocaleString();
+            }
+        }
+
+        function animateNumber(elementId, targetValue, formatter) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const duration = 800;
+            const startTime = performance.now();
+            const startValue = 0;
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const currentValue = startValue + (targetValue - startValue) * easeProgress;
+                
+                element.textContent = formatter(currentValue);
+                element.classList.add('count-up');
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        function updateAllTexts() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = t(key);
+            });
+            drawTreemap();
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+            updateAllTexts();
+        }
+
+        function squarify(data, x, y, width, height) {
+            const total = data.reduce((sum, d) => sum + d.value, 0);
+            if (total === 0 || data.length === 0) return [];
+            
+            const sorted = [...data].sort((a, b) => {
+                if (a.aiExposure !== b.aiExposure) {
+                    return b.aiExposure - a.aiExposure;
+                }
+                return b.value - a.value;
+            });
+            
+            const results = [];
+            
+            const numCols = Math.ceil(Math.sqrt(sorted.length));
+            const colWidth = width / numCols;
+            
+            for (let col = 0; col < numCols; col++) {
+                const colX = col * colWidth;
+                let colRemainingHeight = height;
+                let colY = 0;
+                
+                const colItems = [];
+                let colTotalValue = 0;
+                
+                for (let i = col; i < sorted.length; i += numCols) {
+                    colItems.push(sorted[i]);
+                    colTotalValue += sorted[i].value;
+                }
+                
+                colItems.sort((a, b) => a.aiExposure - b.aiExposure || b.value - a.value);
+                
+                for (let idx = colItems.length - 1; idx >= 0; idx--) {
+                    const item = colItems[idx];
+                    const itemHeight = (item.value / colTotalValue) * colRemainingHeight;
+                    
+                    results.push({
+                        ...item,
+                        x: colX,
+                        y: colY,
+                        width: colWidth,
+                        height: itemHeight
+                    });
+                    
+                    colY += itemHeight;
+                    colRemainingHeight -= itemHeight;
+                }
+                
+                if (colRemainingHeight > 0 && colItems.length > 0) {
+                    const lastItem = results[results.length - 1];
+                    lastItem.height += colRemainingHeight;
+                }
+            }
+            
+            return results;
+        }
+
+        function getExposureColor(exposure) {
+            if (exposure < 2) return { bg: '#22c55e', text: '#166534' };
+            if (exposure < 4) return { bg: '#16a34a', text: '#14532d' };
+            if (exposure < 6) return { bg: '#eab308', text: '#854d0e' };
+            if (exposure < 8) return { bg: '#f97316', text: '#9a3412' };
+            return { bg: '#dc2626', text: '#7f1d1d' };
+        }
+
+        function drawTreemap() {
+            const container = document.getElementById('treemap-container');
+            container.innerHTML = '';
+            
+            const data = getFilteredData();
+            if (data.length === 0) {
+                container.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">${t('noData')}</div>`;
+                return;
+            }
+            
+            const rect = container.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            
+            const valueKey = currentArea === 'salary' ? 'salaryTotal' : 
+                            currentArea === 'demand' ? 'demandValue' : 'employment';
+            
+            const treemapData = data.map(d => ({
+                ...d,
+                value: currentArea === 'salary' ? d.medianPay * d.employment / 10000 :
+                       currentArea === 'demand' ? Math.abs(d.demandChange) * d.employment / 100 + d.employment :
+                       d.employment
+            }));
+            
+            const layout = squarify(treemapData, 0, 0, width, height);
+            
+            layout.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'treemap-rect';
+                div.style.left = item.x + 'px';
+                div.style.top = item.y + 'px';
+                div.style.width = item.width + 'px';
+                div.style.height = item.height + 'px';
+                div.style.animationDelay = (index * 10) + 'ms';
+                
+                const colors = getExposureColor(item.aiExposure);
+                div.style.background = colors.bg;
+                div.style.opacity = 0.85;
+                
+                if (selectedOccupations.includes(item.id)) {
+                    div.classList.add('selected');
+                }
+                
+                const minDim = Math.min(item.width, item.height);
+                const showDetails = minDim > 60;
+                const showFull = minDim > 100;
+                
+                let content = '';
+                if (showDetails) {
+                    const fontSize = Math.min(Math.max(minDim / 12, 10), 16);
+                    content = `
+                        <div class="h-full flex flex-col justify-between p-2 text-white overflow-hidden">
+                            <div>
+                                <div class="font-semibold truncate" style="font-size: ${fontSize}px">${getLocalizedTitle(item)}</div>
+                                ${showFull ? `<div class="text-xs opacity-80 mt-1">${getLocalizedCategory(item.category)}</div>` : ''}
+                            </div>
+                            <div class="text-right">
+                                ${showFull ? `<div class="text-xs opacity-90">${formatNumber(item[currentArea === 'salary' ? 'medianPay' : 'employment'])}</div>` : ''}
+                                <div class="text-xs opacity-80">${t('risk')}: ${item.aiRiskIndex}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                div.innerHTML = content;
+                div.dataset.id = item.id;
+                div.addEventListener('click', () => showModal(item.id));
+                div.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    if (selectedOccupations.includes(item.id)) {
+                        removeFromCompare(item.id);
+                    } else {
+                        addToCompare(item.id);
+                    }
+                });
+                
+                container.appendChild(div);
+            });
+            
+            updateStats(data);
+        }
+
+        function showModal(id) {
+            const data = occupations.find(o => o.id === id);
+            if (!data) return;
+            
+            document.getElementById('modalTitle').textContent = getLocalizedTitle(data);
+            document.getElementById('modalCategory').textContent = getLocalizedCategory(data.category);
+            document.getElementById('modalRiskIndex').textContent = data.aiRiskIndex;
+            document.getElementById('modalEmployment').textContent = formatNumber(data.employment) + (currentLang === 'zh' ? ' 人' : ' ' + t('people'));
+            document.getElementById('modalSalary').textContent = (currentLang === 'zh' ? (data.medianPay / 10000).toFixed(0) + ' 万/年' : '$' + (data.medianPay / 6.5 / 1000).toFixed(0) + 'k' + t('perYear'));
+            
+            const riskBar = document.getElementById('riskBar');
+            riskBar.style.width = (data.aiRiskIndex / 100 * 100) + '%';
+            
+            document.getElementById('impactBar1').style.width = data.affectedWorkRatio + '%';
+            document.getElementById('impactValue1').textContent = data.affectedWorkRatio + '%';
+            
+            const demandChange = document.getElementById('demandChange');
+            demandChange.textContent = (data.demandChange >= 0 ? '+' : '') + data.demandChange + '%';
+            demandChange.className = data.demandChange >= 0 ? 'text-xl font-bold text-green-500' : 'text-xl font-bold text-red-500';
+            
+            const trend = document.getElementById('demandTrend');
+            trend.textContent = data.demandChange >= 0 ? t('demandGrowth') : t('demandDecline');
+            trend.className = data.demandChange >= 0 ? 'text-xs text-green-400' : 'text-xs text-red-400';
+            
+            document.getElementById('skillsBefore').innerHTML = getLocalizedSkills(data.skillsBefore, data.skillsBeforeEn).map(s => 
+                `<span class="inline-block bg-[#2a2a35] px-2 py-1 rounded text-xs mr-1 mb-1">${s}</span>`
+            ).join('');
+            
+            document.getElementById('skillsAfter').innerHTML = getLocalizedSkills(data.skillsAfter, data.skillsAfterEn).map(s => 
+                `<span class="inline-block bg-blue-600/30 px-2 py-1 rounded text-xs mr-1 mb-1 text-blue-300">${s}</span>`
+            ).join('');
+            
+            const maxTrend = Math.max(...data.trendData);
+            const minTrend = Math.min(...data.trendData);
+            for (let i = 1; i <= 5; i++) {
+                const bar = document.getElementById('trendBar' + i);
+                const value = data.trendData[i - 1];
+                bar.style.height = ((value - minTrend + 10) / (maxTrend - minTrend + 20) * 80) + 'px';
+            }
+            
+            document.getElementById('transformationAdvice').textContent = getLocalizedAdvice(data);
+            document.getElementById('relatedJobs').innerHTML = getLocalizedRelatedJobs(data).map(j => 
+                `<span class="bg-blue-600/20 text-blue-400 px-2 py-1 rounded text-xs">${j}</span>`
+            ).join('');
+            
+            document.getElementById('metric1').textContent = data.metrics.techRisk + '/10';
+            document.getElementById('metric2').textContent = data.metrics.workflowChange + '/10';
+            document.getElementById('metric3').textContent = data.metrics.skillEvolution + '/10';
+            document.getElementById('metric4').textContent = data.metrics.salaryAdjustment + '/10';
+            document.getElementById('metric5').textContent = data.metrics.supplyDemand + '/10';
+            
+            const compareBtn = document.getElementById('compareBtn');
+            if (compareList.includes(id)) {
+                compareBtn.textContent = t('removeFromCompare');
+                compareBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                compareBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+            } else {
+                compareBtn.textContent = t('addToCompare');
+                compareBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                compareBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            }
+            compareBtn.onclick = () => {
+                if (compareList.includes(id)) {
+                    removeFromCompare(id);
+                    compareBtn.textContent = t('addToCompare');
+                    compareBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    compareBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                } else {
+                    addToCompare(id);
+                    compareBtn.textContent = t('removeFromCompare');
+                    compareBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    compareBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                }
+            };
+            
+            document.getElementById('exportSingleBtn').onclick = () => {
+                const csv = currentLang === 'zh' 
+                    ? `职位,${data.title}\n分类,${data.category}\n就业人数,${data.employment}\n平均年薪,${data.medianPay}\n学历要求,${data.education}\n经验要求,${data.experience}\nAI暴露度,${data.aiExposure}\nAI风险指数,${data.aiRiskIndex}\n受影响工作比例,${data.affectedWorkRatio}%\n需求变化,${data.demandChange}%\n转型建议,${data.transformationAdvice}`
+                    : `Position,${data.titleEn || data.title}\nCategory,${getLocalizedCategory(data.category)}\nEmployment,${data.employment}\nAvg Salary,${data.medianPay}\nEducation,${data.education}\nExperience,${data.experience}\nAI Exposure,${data.aiExposure}\nAI Risk Index,${data.aiRiskIndex}\nAffected Work,${data.affectedWorkRatio}%\nDemand Change,${data.demandChange}%\nAdvice,${data.transformationAdviceEn || data.transformationAdvice}`;
+                downloadCSV(csv, (currentLang === 'zh' ? (data.title + '_数据.csv') : ((data.titleEn || data.title) + '_data.csv')));
+            };
+            
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function updateStats(data) {
+            const totalEmployment = data.reduce((sum, d) => sum + d.employment, 0);
+            const weightedExposure = data.reduce((sum, d) => sum + d.aiExposure * d.employment, 0) / totalEmployment;
+            const avgRisk = data.reduce((sum, d) => sum + d.aiRiskIndex, 0) / data.length;
+            
+            animateNumber('totalEmployment', totalEmployment, formatNumber);
+            animateNumber('avgExposure', weightedExposure, (n) => n.toFixed(1));
+            animateNumber('riskIndex', Math.round(avgRisk), (n) => n.toString());
+            
+            const cat1 = data.filter(d => d.aiExposure < 2);
+            const cat2 = data.filter(d => d.aiExposure >= 2 && d.aiExposure < 4);
+            const cat3 = data.filter(d => d.aiExposure >= 4 && d.aiExposure < 6);
+            const cat4 = data.filter(d => d.aiExposure >= 6 && d.aiExposure < 8);
+            const cat5 = data.filter(d => d.aiExposure >= 8);
+            
+            document.getElementById('cat1Count').textContent = formatNumber(cat1.reduce((s, d) => s + d.employment, 0));
+            document.getElementById('cat2Count').textContent = formatNumber(cat2.reduce((s, d) => s + d.employment, 0));
+            document.getElementById('cat3Count').textContent = formatNumber(cat3.reduce((s, d) => s + d.employment, 0));
+            document.getElementById('cat4Count').textContent = formatNumber(cat4.reduce((s, d) => s + d.employment, 0));
+            document.getElementById('cat5Count').textContent = formatNumber(cat5.reduce((s, d) => s + d.employment, 0));
+            
+            document.getElementById('cat1Percent').textContent = ((cat1.reduce((s, d) => s + d.employment, 0) / totalEmployment) * 100).toFixed(1) + '%';
+            document.getElementById('cat2Percent').textContent = ((cat2.reduce((s, d) => s + d.employment, 0) / totalEmployment) * 100).toFixed(1) + '%';
+            document.getElementById('cat3Percent').textContent = ((cat3.reduce((s, d) => s + d.employment, 0) / totalEmployment) * 100).toFixed(1) + '%';
+            document.getElementById('cat4Percent').textContent = ((cat4.reduce((s, d) => s + d.employment, 0) / totalEmployment) * 100).toFixed(1) + '%';
+            document.getElementById('cat5Percent').textContent = ((cat5.reduce((s, d) => s + d.employment, 0) / totalEmployment) * 100).toFixed(1) + '%';
+            
+            const maxEmp = Math.max(cat1.reduce((s, d) => s + d.employment, 0), 
+                                     cat2.reduce((s, d) => s + d.employment, 0),
+                                     cat3.reduce((s, d) => s + d.employment, 0),
+                                     cat4.reduce((s, d) => s + d.employment, 0),
+                                     cat5.reduce((s, d) => s + d.employment, 0));
+            
+            document.getElementById('bar1').style.width = (cat1.reduce((s, d) => s + d.employment, 0) / maxEmp * 100) + '%';
+            document.getElementById('bar2').style.width = (cat2.reduce((s, d) => s + d.employment, 0) / maxEmp * 100) + '%';
+            document.getElementById('bar3').style.width = (cat3.reduce((s, d) => s + d.employment, 0) / maxEmp * 100) + '%';
+            document.getElementById('bar4').style.width = (cat4.reduce((s, d) => s + d.employment, 0) / maxEmp * 100) + '%';
+       document.getElementById('bar5').style.width = (cat5.reduce((s, d) => s + d.employment, 0) / maxEmp * 100) + '%';
+        }
+
+        function getFilteredData() {
+            const category = document.getElementById('filterCategory').value;
+            const risk = document.getElementById('filterRisk').value;
+            
+            let filtered = [...occupations];
+            
+            if (category !== 'all') {
+                filtered = filtered.filter(d => d.category === category);
+            }
+            
+            if (risk === 'low') {
+                filtered = filtered.filter(d => d.aiExposure < 4);
+            } else if (risk === 'medium') {
+                filtered = filtered.filter(d => d.aiExposure >= 4 && d.aiExposure < 7);
+            } else if (risk === 'high') {
+                filtered = filtered.filter(d => d.aiExposure >= 7);
+            }
+            
+            return filtered;
+        }
+
+        function refresh() {
+            drawTreemap();
+        }
+
+        function exportCSV() {
+            const data = getFilteredData();
+            let csv = currentLang === 'zh' ? '职位,分类,就业人数,平均年薪,学历要求,经验要求,AI暴露度,AI风险指数,受影响工作比例,需求变化\n' : 'Position,Category,Employment,Avg Salary,Education,Experience,AI Exposure,AI Risk Index,Affected Work Ratio,Demand Change\n';
+            
+            data.forEach(d => {
+                const title = currentLang === 'zh' ? d.title : (d.titleEn || d.title);
+                const cat = getLocalizedCategory(d.category);
+                csv += `"${title}","${cat}",${d.employment},${d.medianPay},${d.education},${d.experience},${d.aiExposure},${d.aiRiskIndex},${d.affectedWorkRatio}%,${d.demandChange}%\n`;
+            });
+            
+            downloadCSV(csv, currentLang === 'zh' ? '汽车行业就业数据.csv' : 'automotive_employment_data.csv');
+        }
+
+        function downloadCSV(content, filename) {
+            const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+
+        function addToCompare(id) {
+            if (!compareList.includes(id) && compareList.length < 4) {
+                compareList.push(id);
+                updateComparePanel();
+                drawTreemap();
+            }
+        }
+
+        function removeFromCompare(id) {
+            compareList = compareList.filter(i => i !== id);
+            updateComparePanel();
+            drawTreemap();
+            
+            const modal = document.getElementById('detailModal');
+            if (!modal.classList.contains('hidden')) {
+                const compareBtn = document.getElementById('compareBtn');
+                if (compareBtn) {
+                    compareBtn.textContent = t('addToCompare');
+                    compareBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    compareBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                }
+            }
+        }
+
+        function updateComparePanel() {
+            const panel = document.getElementById('comparePanel');
+            const items = document.getElementById('compareItems');
+            
+            if (compareList.length === 0) {
+                panel.classList.add('hidden');
+                return;
+            }
+            
+            panel.classList.remove('hidden');
+            items.innerHTML = compareList.map(id => {
+                const data = occupations.find(o => o.id === id);
+                const colors = getExposureColor(data.aiExposure);
+                return `
+                    <div class="flex-shrink-0 bg-[#1a1a24] rounded-lg p-3 min-w-[150px]">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-medium text-sm">${getLocalizedTitle(data)}</span>
+                            <button onclick="removeFromCompare('${id}')" class="text-gray-400 hover:text-white">×</button>
+                        </div>
+                        <div class="text-xs text-gray-500">${getLocalizedCategory(data.category)}</div>
+                        <div class="mt-2 flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-xs text-white" style="background: ${colors.bg}">${data.aiRiskIndex}</span>
+                            <span class="text-xs text-gray-400">${formatNumber(data.employment)} ${currentLang === 'zh' ? '人' : t('people')}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('detailModal').classList.add('hidden');
+        });
+
+        document.getElementById('detailModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('detailModal')) {
+                document.getElementById('detailModal').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('clearCompare').addEventListener('click', () => {
+            compareList = [];
+            updateComparePanel();
+            drawTreemap();
+        });
+
+        document.getElementById('exportBtn').addEventListener('click', exportCSV);
+
+        document.getElementById('filterCategory').addEventListener('change', refresh);
+        document.getElementById('filterRisk').addEventListener('change', refresh);
+
+        document.getElementById('areaBtn-employment').addEventListener('click', () => {
+            currentArea = 'employment';
+            document.getElementById('areaBtn-employment').classList.add('bg-[#1a1a24]', 'border-[#2a2a35]');
+            document.getElementById('areaBtn-employment').classList.remove('bg-transparent', 'border-transparent', 'text-gray-400');
+            document.getElementById('areaBtn-salary').classList.remove('bg-[#1a1a24]', 'border-[#2a2a35]');
+            document.getElementById('areaBtn-salary').classList.add('bg-transparent', 'border-transparent', 'text-gray-400');
+            document.getElementById('areaBtn-demand').classList.remove('bg-[#1a1a24]', 'border-[#2a2a35]');
+            document.getElementById('areaBtn-demand').classList.add('bg-transparent', 'border-transparent', 'text-gray-400');
+            drawTreemap();
+        });
+
+        document.getElementById('areaBtn-salary').addEventListener('click', () => {
+            currentArea = 'salary';
+            document.getElementById('areaBtn-salary').classList.add('bg-[#1a1a24]', 'border-[#2a2a35]');
+            document.getElementById('areaBtn-salary').classList.remove('bg-transparent', 'border-transparent', 'text-gray-400');
+            document.getElementById('areaBtn-employment').classList.remove('bg-[#1a1a24]', 'border-[#2a2a35]');
+            document.getElementById('areaBtn-employment').classList.add('bg-transparent', 'border-transparent', 'text-gray-400');
+            document.getElementById('areaBtn-demand').classList.remove('bg-[#1a1a24]', 'border-[#2a2a35]');
+            document.getElementById('areaBtn-demand').classList.add('bg-transparent', 'border-transparent', 'text-gray-400');
+            drawTreemap();
+        });
+
+        document.getElementById('areaBtn-demand').addEventListener('click', () => {
+            currentArea = 'demand';
+            document.getElementById('areaBtn-demand').classList.add('bg-[#1a1a24]', 'border-[#2a2a35]');
+            document.getElementById('areaBtn-demand').classList.remove('bg-transparent', 'border-transparent', 'text-gray-400');
+            document.getElementById('areaBtn-employment').classList.remove('bg-[#1a1a24]', 'border-[#2a2a35]');
+            document.getElementById('areaBtn-employment').classList.add('bg-transparent', 'border-transparent', 'text-gray-400');
+            document.getElementById('areaBtn-salary').classList.remove('bg-[#1a1a24]', 'border-[#2a2a35]');
+            document.getElementById('areaBtn-salary').classList.add('bg-transparent', 'border-transparent', 'text-gray-400');
+            drawTreemap();
+        });
+
+        document.getElementById('lang-zh').addEventListener('click', () => {
+            setLanguage('zh');
+        });
+
+        document.getElementById('lang-en').addEventListener('click', () => {
+            setLanguage('en');
+        });
+
+        window.addEventListener('resize', drawTreemap);
+
+        function animateLoading() {
+            const loadingBar = document.getElementById('loadingBar');
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                }
+                loadingBar.style.width = progress + '%';
+            }, 100);
+        }
+        
+        animateLoading();
+
+        setTimeout(() => {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.opacity = '0';
+            loadingOverlay.style.transition = 'opacity 0.5s ease-out';
+            setTimeout(() => {
+                loadingOverlay.classList.add('hidden');
+            }, 500);
+            drawTreemap();
+        }, 800);
+    </script>
+</body>
+</html>
