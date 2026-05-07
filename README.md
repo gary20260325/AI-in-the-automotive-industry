@@ -1,7 +1,7 @@
 
 # AI对汽车行业就业市场的冲击
 
-[查看英文说明](#impact-of-ai-on-automotive-industry-employment)
+[查看英文说明 See the English version](#impact-of-ai-on-automotive-industry-employment)
 <img width="1667" height="1058" alt="image" src="https://github.com/user-attachments/assets/332ee3fe-ab0f-453e-be09-93fd72a87e83" />
 
 ## 📋 项目简介
